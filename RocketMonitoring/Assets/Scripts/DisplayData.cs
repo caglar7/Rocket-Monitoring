@@ -7,7 +7,7 @@ using TMPro;
 // DISPLAYED DATA
 // LAT LONG A V FRT SND LAT_B LONG_B
 // FRT SND WILL TRIGGER ACTIONS ON THE ROCKET
-// ANGLE IS NOT ON HERE, IT WILL BE APPLIED TO ROCKET
+// ANGLE IS A STATIC VARIABLE ON THE ROCKETCONTROLLER, directions
 
 // DATA ORDER AND INDEXES, IN STRING ARRAY
 /*
@@ -33,7 +33,7 @@ public class DisplayData : MonoBehaviour
     float readPeriodRemaining;
     [SerializeField]
     [Header("Data Reading Period")]
-    float readPeriod = 0.3f;
+    float readPeriod = 0.5f;
 
     // initial canvas, later will be changed to more advanced displays
     [Header("TextMesh Pro Elements")]
@@ -89,9 +89,7 @@ public class DisplayData : MonoBehaviour
 
                 // if data is valid, do something
                 if (checkValidFirst && checkValidSecond)
-                {
-                    Debug.Log("check success");
-                  
+                {              
                     // display lat and long, 0 and 1
                     textRocketLatLong.text = "" + "Rocket Coordinates\n";
                     textRocketLatLong.text += datas[0] + "\n";
@@ -120,6 +118,9 @@ public class DisplayData : MonoBehaviour
                     textBaseLatLong.text = "" + "Base Coordinates\n";
                     textBaseLatLong.text += datas[7] + "\n";
                     textBaseLatLong.text += datas[8];
+
+                    // assign rotation directions string on the RocketController.cs, 4
+                    RocketController.angleDirections = datas[4];
                 }
             }
             catch (System.Exception)
