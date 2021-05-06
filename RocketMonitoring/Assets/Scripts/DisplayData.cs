@@ -33,7 +33,7 @@ public class DisplayData : MonoBehaviour
     float readPeriodRemaining;
     [SerializeField]
     [Header("Data Reading Period")]
-    float readPeriod = 0.5f;
+    float readPeriod = 0.2f;
 
     // initial canvas, later will be changed to more advanced displays
     [Header("TextMesh Pro Elements")]
@@ -89,7 +89,10 @@ public class DisplayData : MonoBehaviour
 
                 // if data is valid, do something
                 if (checkValidFirst && checkValidSecond)
-                {              
+                {
+                    // observe data at this read period
+                    Debug.Log(receivedData);
+
                     // display lat and long, 0 and 1
                     textRocketLatLong.text = "" + "Rocket Coordinates\n";
                     textRocketLatLong.text += datas[0] + "\n";
