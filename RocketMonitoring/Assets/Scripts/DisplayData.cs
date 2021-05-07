@@ -46,6 +46,11 @@ public class DisplayData : MonoBehaviour
     public Color colorDefaultFrtSnd;
     public Color colorGreenFrtSnd;
 
+    [Header("Scene Objects")]
+    [SerializeField]
+    GameObject rocketObject;
+
+
     void Start()
     {
         sp.Open();
@@ -105,8 +110,6 @@ public class DisplayData : MonoBehaviour
                     textRocketVelocity.text += datas[3];
 
                     // display first and second parachute, 5 and 6
-                    //textFirstParachute.text = "First Parachute";
-                    //textSecondParachute.text = "Second Parachute";
                     if (datas[5] == "0")
                         textFirstParachute.color = colorDefaultFrtSnd;
                     else
