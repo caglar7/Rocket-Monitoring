@@ -25,7 +25,7 @@ using TMPro;
 public class DisplayData : MonoBehaviour
 {
     // com and baud rate later will initially selected 
-    SerialPort sp = new SerialPort("COM6", 9600);
+    SerialPort sp = new SerialPort("COM4", 9600);
 
     bool readAvailable = true;
 
@@ -95,9 +95,6 @@ public class DisplayData : MonoBehaviour
                 // if data is valid, do something
                 if (checkValidFirst && checkValidSecond)
                 {
-                    // observe data at this read period
-                    Debug.Log(receivedData);
-
                     // display lat and long, 0 and 1
                     textRocketLatLong.text = "" + "Rocket Coordinates\n";
                     textRocketLatLong.text += datas[0] + "\n";
@@ -126,7 +123,8 @@ public class DisplayData : MonoBehaviour
                     textBaseLatLong.text += datas[8];
 
                     // assign rotation directions string on the RocketController.cs, 4
-                    RocketController.angleDirections = datas[4];
+                    string[] RPstrings = datas[4].Split(',');
+                    RocketController.instance.RotateRocket(RPstrings[0], RPstrings[1]);
                 }
             }
             catch (System.Exception)

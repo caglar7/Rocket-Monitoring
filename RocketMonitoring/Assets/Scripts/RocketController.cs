@@ -20,43 +20,36 @@ using System.IO.Ports;
 public class RocketController : MonoBehaviour
 {
     // static variable that's assigned from DisplayData.cs
-    public static string angleDirections = "000";
+    public static RocketController instance;
 
     [SerializeField]
     [Header("Rocket Movement Elements")]
     float angularVelocity = 30;
 
+    void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else if (instance != this)
+            Destroy(gameObject);
+    }
+
     void Start()
     {
-        angleDirections = "000";
+        
     }
 
     
     void Update()
+    { 
+       
+    }
+
+    public void RotateRocket(string rollString, string pitchString)
     {
-        // 0 static, 1 negative, 2 positive rotational direction, from static variable
+        float rollFloat = float.Parse(rollString) / 100f;
+        float pitchFloat = float.Parse(pitchString) / 100f;
+        transform.Rotate(rollFloat, 0f, pitchFloat);
 
-        // string to int
-        int xData = Int32.Parse(angleDirections[0].ToString());
-        int yData = Int32.Parse(angleDirections[1].ToString());
-        int zData = Int32.Parse(angleDirections[2].ToString());
-
-        // convert to proper directions
-        int xDir = (xData * 2) - 3;
-        if (xData == 0)
-            xDir = 0;
-
-        int yDir = (yData * 2) - 3;
-        if (yData == 0)
-            yDir = 0;
-
-        int zDir = (zData * 2) - 3;
-        if (zData == 0)
-            zDir = 0;
-
-        float incrementX = xDir * angularVelocity * Time.deltaTime;
-        float incrementY = yDir * angularVelocity * Time.deltaTime;
-        float incrementZ = zDir * angularVelocity * Time.deltaTime;
-        transform.Rotate(incrementX, incrementY, incrementZ);
     }
 }
