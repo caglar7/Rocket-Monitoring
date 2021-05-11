@@ -25,15 +25,16 @@ public class RocketController : MonoBehaviour
     float rollPrev = 0f, pitchPrev = 0f;
     float rollDiff = 0f, pitchDiff = 0f;
     float rollSet = 0f, pitchSet = 0f;
+    public int materialSelected = 0;
 
-    [SerializeField]
     [Header("Rocket Movement Elements")]
+    [SerializeField]
     float angleSetTime = 0.1f;
-    float angularVelocity = 90f;
 
-
-    // test delete later
-    float rotateX = 0f;
+    [Header("Rocket Materials")]
+    [SerializeField]
+    Material[] rocketMaterials;
+    
 
     void Awake()
     {
@@ -45,7 +46,8 @@ public class RocketController : MonoBehaviour
 
     void Start()
     {
-    
+        // set initial material
+        SetRocketMaterial(0);
     }
 
     
@@ -68,15 +70,10 @@ public class RocketController : MonoBehaviour
 
         // rotation
         transform.rotation = Quaternion.Euler(rollSet, 0f, pitchSet);
-
-        Debug.Log("rollSet: " + rollSet + "     rollCurrent: " + rollCurrent);
     }
 
     public void RotateRocket(string rollString, string pitchString)
     {
-
-        Debug.Log("############################################");
-
         rollPrev = rollCurrent;
         pitchPrev = pitchCurrent;
 
@@ -88,5 +85,12 @@ public class RocketController : MonoBehaviour
         
         rollSet = rollPrev;
         pitchSet = pitchPrev;
+    }
+
+    // index 0 for glow, 1 for hull material
+    public void SetRocketMaterial(int index)
+    {
+        GetComponent<MeshRenderer>().material = rocketMaterials[index];
+        materialSelected = index;
     }
 }
