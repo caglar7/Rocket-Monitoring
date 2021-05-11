@@ -21,10 +21,19 @@ public class RocketController : MonoBehaviour
 {
     // static variable that's assigned from DisplayData.cs
     public static RocketController instance;
+    float rollCurrent = 0f, pitchCurrent = 0f;
+    float rollPrev = 0f, pitchPrev = 0f;
+    float rollDiff = 0f, pitchDiff = 0f;
+    float rollSet = 0f, pitchSet = 0f;
 
     [SerializeField]
     [Header("Rocket Movement Elements")]
-    float angularVelocity = 30;
+    float angleSetTime = 0.1f;
+    float angularVelocity = 90f;
+
+
+    // test delete later
+    float rotateX = 0f;
 
     void Awake()
     {
@@ -36,20 +45,48 @@ public class RocketController : MonoBehaviour
 
     void Start()
     {
-        
+    
     }
 
     
     void Update()
-    { 
-       
+    {
+        if (rollDiff == 0f && pitchDiff == 0f)
+            return;
+
+        // rotation increments
+        rollSet += (rollDiff * Time.deltaTime / angleSetTime);
+        pitchSet += (pitchDiff * Time.deltaTime / angleSetTime);
+
+        // check if angle is reached
+        float newRollDiff = rollCurrent - rollSet;
+        float newPitchDiff = pitchCurrent - pitchSet;
+        if((rollDiff * newRollDiff) <= 0f)
+            rollSet = rollCurrent;
+        if ((pitchDiff * newPitchDiff) <= 0f)
+            pitchSet = pitchCurrent;
+
+        // rotation
+        transform.rotation = Quaternion.Euler(rollSet, 0f, pitchSet);
+
+        Debug.Log("rollSet: " + rollSet + "     rollCurrent: " + rollCurrent);
     }
 
     public void RotateRocket(string rollString, string pitchString)
     {
-        float rollFloat = float.Parse(rollString) / 100f;
-        float pitchFloat = float.Parse(pitchString) / 100f;
-        transform.Rotate(rollFloat, 0f, pitchFloat);
 
+        Debug.Log("############################################");
+
+        rollPrev = rollCurrent;
+        pitchPrev = pitchCurrent;
+
+        rollCurrent = float.Parse(rollString) / 100f;
+        pitchCurrent = float.Parse(pitchString) / 100f;
+        
+        rollDiff = rollCurrent - rollPrev;
+        pitchDiff = pitchCurrent - pitchPrev;
+        
+        rollSet = rollPrev;
+        pitchSet = pitchPrev;
     }
 }
