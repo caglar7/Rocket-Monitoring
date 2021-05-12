@@ -31,25 +31,13 @@ public class DisplayData : MonoBehaviour
 
     // make sure this matches with arduino data transmission freq 
     float readPeriodRemaining;
-    [SerializeField]
     [Header("Data Reading Period")]
+    [SerializeField]
     float readPeriod = 0.2f;
 
-    // initial canvas, later will be changed to more advanced displays
-    [Header("TextMesh Pro Elements")]
-    public TextMeshProUGUI textRocketLatLong;
-    public TextMeshProUGUI textRocketAltitude;
-    public TextMeshProUGUI textRocketVelocity;
-    public TextMeshProUGUI textFirstParachute;
-    public TextMeshProUGUI textSecondParachute;
-    public TextMeshProUGUI textBaseLatLong;
-    public Color colorDefaultFrtSnd;
-    public Color colorGreenFrtSnd;
-
-    [Header("Scene Objects")]
+    [Header("Velocity Parameters")]
     [SerializeField]
-    GameObject rocketObject;
-
+    SpeedometerController speedometer;
 
     void Start()
     {
@@ -95,32 +83,10 @@ public class DisplayData : MonoBehaviour
                 // if data is valid, do something
                 if (checkValidFirst && checkValidSecond)
                 {
-                    // display lat and long, 0 and 1
-                    textRocketLatLong.text = "" + "Rocket Coordinates\n";
-                    textRocketLatLong.text += datas[0] + "\n";
-                    textRocketLatLong.text += datas[1];
-
-                    // display altitude and velocity, 2 and 3
-                    textRocketAltitude.text = "" + "Altitude\n";
-                    textRocketAltitude.text += datas[2];
-                    textRocketVelocity.text = "" + "Velocity\n";
-                    textRocketVelocity.text += datas[3];
-
-                    // display first and second parachute, 5 and 6
-                    if (datas[5] == "0")
-                        textFirstParachute.color = colorDefaultFrtSnd;
-                    else
-                        textFirstParachute.color = colorGreenFrtSnd;
-
-                    if (datas[6] == "0")
-                        textSecondParachute.color = colorDefaultFrtSnd;
-                    else
-                        textSecondParachute.color = colorGreenFrtSnd;
-
-                    // display base lat and long, 7 and 8
-                    textBaseLatLong.text = "" + "Base Coordinates\n";
-                    textBaseLatLong.text += datas[7] + "\n";
-                    textBaseLatLong.text += datas[8];
+                    // velocity unit conversion and set on speedometer, 3
+                    float speedData_meters = float.Parse(datas[3]) / 100f;
+                    float speedData_km = speedData_meters * 3600f / 1000f;
+                    speedometer.SetSpeed(speedData_km);
 
                     // assign rotation directions string on the RocketController.cs, 4
                     string[] RPstrings = datas[4].Split(',');
@@ -134,3 +100,35 @@ public class DisplayData : MonoBehaviour
         }
     }
 }
+
+
+/* TEXT DISPLAY CODE
+ * 
+    // display lat and long, 0 and 1
+    textRocketLatLong.text = "" + "Rocket Coordinates\n";
+    textRocketLatLong.text += datas[0] + "\n";
+    textRocketLatLong.text += datas[1];
+
+    // display altitude and velocity, 2 and 3
+    textRocketAltitude.text = "" + "Altitude\n";
+    textRocketAltitude.text += datas[2];
+    textRocketVelocity.text = "" + "Velocity\n";
+    textRocketVelocity.text += datas[3];
+
+    // display first and second parachute, 5 and 6
+    if (datas[5] == "0")
+        textFirstParachute.color = colorDefaultFrtSnd;
+    else
+        textFirstParachute.color = colorGreenFrtSnd;
+
+    if (datas[6] == "0")
+        textSecondParachute.color = colorDefaultFrtSnd;
+    else
+        textSecondParachute.color = colorGreenFrtSnd;
+
+    // display base lat and long, 7 and 8
+    textBaseLatLong.text = "" + "Base Coordinates\n";
+    textBaseLatLong.text += datas[7] + "\n";
+    textBaseLatLong.text += datas[8];
+
+ */
