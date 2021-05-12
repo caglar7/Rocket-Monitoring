@@ -39,6 +39,10 @@ public class DisplayData : MonoBehaviour
     [SerializeField]
     SpeedometerController speedometer;
 
+    [Header("Altitude Parameters")]
+    [SerializeField]
+    TextMeshProUGUI textAltitude;
+
     void Start()
     {
         sp.Open();
@@ -83,6 +87,10 @@ public class DisplayData : MonoBehaviour
                 // if data is valid, do something
                 if (checkValidFirst && checkValidSecond)
                 {
+                    // altitude display, convert float then format to proper string
+                    float altitudeData = float.Parse(datas[2]) / 100f;
+                    textAltitude.text = altitudeData.ToString();
+
                     // velocity unit conversion and set on speedometer, 3
                     float speedData_meters = float.Parse(datas[3]) / 100f;
                     float speedData_km = speedData_meters * 3600f / 1000f;

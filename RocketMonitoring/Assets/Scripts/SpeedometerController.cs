@@ -40,6 +40,9 @@ public class SpeedometerController : MonoBehaviour
         float speedNormalized = Mathf.Clamp(speed / MAX_SPEED, 0f, 1f);
         float angle = MIN_ANGLE + (MAX_ANGLE - MIN_ANGLE) * speedNormalized;
         pinTransform.eulerAngles = new Vector3(0f, 0f, angle);
+
+        // update speed text
+        textSpeed.text = speed.ToString("0.0");
     }
 
     public void SetSpeed(float s)
