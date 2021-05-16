@@ -27,12 +27,19 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 	List<GameObject> _spawnedObjects;
 
-	[Header("Added Parameters")]
-	[SerializeField] Camera mapCamera;
-	float baseScaleFactor = 50f;
+	[Header("Map Camera Parameters")]
+	[SerializeField] Camera _mapCamera;
+	float _baseScaleFactor = 50f;
+	[SerializeField] float _cameraMovePeriod = 1f;
+	Vector3 _cameraDiff;
+
+	[Header("Position Set Parameters")]
 	[SerializeField] float baseSetPeriod = 0.5f;
 	float timeRemaining = 0f;
 
+	[Header("Prefab Marker Parameters")]
+	[SerializeField] float yPosition = 10f;
+	[SerializeField] float markerScale = 1f;
 
 	void Start()
 	{
@@ -45,7 +52,12 @@ public class SpawnOnMapCustom : MonoBehaviour
 			var locationString = _locationStrings[i];
 			_locations[i] = Conversions.StringToLatLon(locationString);
 			var instance = Instantiate(_markerPrefab);
-			instance.transform.localPosition = _map.GeoToWorldPosition(_locations[i], true);
+
+			Vector3 rawPosition = _map.GeoToWorldPosition(_locations[i], true);
+			instance.transform.localPosition = new Vector3(rawPosition.x, yPosition, rawPosition.z);
+			//instance.transform.localPosition = _map.GeoToWorldPosition(_locations[i], true);
+
+			instance.transform.rotation = Quaternion.Euler(90f, 0f, 0f); 
 			instance.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 			_spawnedObjects.Add(instance);
 		}
@@ -53,21 +65,22 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 	private void Update()
 	{
-        // set base positions every 0.5 secs
+        // set base positions every 0.5 secs smoothly
         timeRemaining -= Time.deltaTime;
         if (timeRemaining <= 0f)
         {
             timeRemaining = baseSetPeriod;
-            SetBasePosition();
+			SetBasePosition();
         }
+        _locations[0] += (_diffValues[0] * Time.deltaTime / baseSetPeriod);
 
-		// set new base location smoothly
-		_locations[0] += (_diffValues[0] * Time.deltaTime / baseSetPeriod);
 
         // set proper scale for markers on map, 
-        float currentScale = mapCamera.transform.position.y / baseScaleFactor;
-		_spawnScale = currentScale;
+        float currentScale = _mapCamera.transform.position.y / _baseScaleFactor;
+		_spawnScale = currentScale * markerScale;
 
+		// move map camera towards base marker
+		_mapCamera.transform.position += (_cameraDiff * Time.deltaTime / _cameraMovePeriod);
 
 		// set location for markers
 		int count = _spawnedObjects.Count;
@@ -75,7 +88,12 @@ public class SpawnOnMapCustom : MonoBehaviour
 		{
 			var spawnedObject = _spawnedObjects[i];
 			var location = _locations[i];
-			spawnedObject.transform.localPosition = _map.GeoToWorldPosition(location, true);
+
+			Vector3 rawPosition = _map.GeoToWorldPosition(_locations[i], true);
+			spawnedObject.transform.localPosition = new Vector3(rawPosition.x, yPosition, rawPosition.z);
+			//instance.transform.localPosition = _map.GeoToWorldPosition(_locations[i], true);
+
+			spawnedObject.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
 			spawnedObject.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 		}
 	}
@@ -90,5 +108,10 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 		Vector2d nextLocation = Conversions.StringToLatLon(latitude + "," + longitude);
 		_diffValues[0] = nextLocation - _locations[0];
+
+		// set next camera position with base position update
+		Vector3 tempPos = _map.GeoToWorldPosition(nextLocation, false);
+		Vector3 nextCamPos = new Vector3(tempPos.x, _mapCamera.transform.position.y, tempPos.z);
+		_cameraDiff = nextCamPos - _mapCamera.transform.position;
 	}
 }
