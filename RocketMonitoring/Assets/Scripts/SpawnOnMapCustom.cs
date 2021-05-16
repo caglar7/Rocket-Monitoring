@@ -57,7 +57,6 @@ public class SpawnOnMapCustom : MonoBehaviour
 			instance.transform.localPosition = new Vector3(rawPosition.x, yPosition, rawPosition.z);
 			//instance.transform.localPosition = _map.GeoToWorldPosition(_locations[i], true);
 
-			instance.transform.rotation = Quaternion.Euler(90f, 0f, 0f); 
 			instance.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 			_spawnedObjects.Add(instance);
 		}
@@ -93,7 +92,6 @@ public class SpawnOnMapCustom : MonoBehaviour
 			spawnedObject.transform.localPosition = new Vector3(rawPosition.x, yPosition, rawPosition.z);
 			//instance.transform.localPosition = _map.GeoToWorldPosition(_locations[i], true);
 
-			spawnedObject.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
 			spawnedObject.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 		}
 	}
