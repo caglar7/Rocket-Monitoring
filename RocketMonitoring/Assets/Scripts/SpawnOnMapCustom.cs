@@ -7,6 +7,11 @@ using System.Collections.Generic;
 
 // vectors have only 1 value for now, 0 index only
 
+public enum ZoomAction{
+	ZoomIn,
+	ZoomOut
+}
+
 public class SpawnOnMapCustom : MonoBehaviour
 {
 	[SerializeField]
@@ -29,20 +34,27 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 	[Header("Map Camera Parameters")]
 	[SerializeField] Camera _mapCamera;
+
+	[Header("Marker Parameters")]
+	[SerializeField] float _baseSetPeriod = 0.5f;
+	float _timeRemaining = 0f;
+	[SerializeField] float _yPosition = 10f;
+	[SerializeField] float _markerScale = 1f;
 	float _baseScaleFactor = 50f;
-	[SerializeField] float _cameraMovePeriod = 1f;
-	Vector3 _cameraDiff;
 
-	[Header("Position Set Parameters")]
-	[SerializeField] float baseSetPeriod = 0.5f;
-	float timeRemaining = 0f;
-
-	[Header("Prefab Marker Parameters")]
-	[SerializeField] float yPosition = 10f;
-	[SerializeField] float markerScale = 1f;
+	const float WIDTH = 51.32f;
+	const float HEIGHT = 45.92f;
+	float prevDragX = 0f;
+	float prevDragZ = 0f;
+	float currentDragX = 0f;
+	float currentDragZ = 0f;
 
 	void Start()
 	{
+		// set proper scale for markers on map, 
+		float currentScale = _mapCamera.transform.position.y / _baseScaleFactor;
+		_spawnScale = currentScale * _markerScale;
+
 		_locations = new Vector2d[_locationStrings.Length];
 		_diffValues = new Vector2d[_locationStrings.Length];
 
@@ -54,7 +66,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 			var instance = Instantiate(_markerPrefab);
 
 			Vector3 rawPosition = _map.GeoToWorldPosition(_locations[i], true);
-			instance.transform.localPosition = new Vector3(rawPosition.x, yPosition, rawPosition.z);
+			instance.transform.localPosition = new Vector3(rawPosition.x, _yPosition, rawPosition.z);
 			//instance.transform.localPosition = _map.GeoToWorldPosition(_locations[i], true);
 
 			instance.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
@@ -64,24 +76,53 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 	private void Update()
 	{
-        // set base positions every 0.5 secs smoothly
-        timeRemaining -= Time.deltaTime;
-        if (timeRemaining <= 0f)
+		// current camera scale
+		float currentScale = _mapCamera.transform.position.y / _baseScaleFactor;
+		_spawnScale = currentScale * _markerScale;
+
+
+		// MOVE CAMERA WITH MOUSE DRAG ###############################################################
+		if (DraggingMap.isDragging)
         {
-            timeRemaining = baseSetPeriod;
+			prevDragX = currentDragX;
+			currentDragX = DraggingMap.dragX;
+			float diff1 = prevDragX - currentDragX;
+			if(prevDragX != 0f && currentDragX != 0f)
+				_mapCamera.transform.position += new Vector3(diff1 * currentScale * WIDTH, 0f, 0f);
+
+			prevDragZ = currentDragZ;
+			currentDragZ = DraggingMap.dragZ;
+			float diff2 = prevDragZ - currentDragZ;
+			if(prevDragZ != 0f && currentDragZ != 0f)
+				_mapCamera.transform.position += new Vector3(0f, 0f, diff2 * currentScale * HEIGHT);
+		}
+		else
+        {
+			prevDragX = 0f;
+			currentDragX = 0f;
+			prevDragZ = 0f;
+			currentDragZ = 0f;
+        }
+		// ###################################################################################################
+
+
+		// set position every 0.5 secs
+		_timeRemaining -= Time.deltaTime;
+        if (_timeRemaining <= 0f)
+        {
+            _timeRemaining = _baseSetPeriod;
 			SetBasePosition();
         }
-        _locations[0] += (_diffValues[0] * Time.deltaTime / baseSetPeriod);
+        _locations[0] += (_diffValues[0] * Time.deltaTime / _baseSetPeriod);
+
+		// rocket position
+		float horizontal = Input.GetAxis("Horizontal");
+		float vertical = Input.GetAxis("Vertical");
+		_locations[1].x += (vertical * 0.00100f * Time.deltaTime);
+		_locations[1].y += (horizontal * 0.00100f * Time.deltaTime);
 
 
-        // set proper scale for markers on map, 
-        float currentScale = _mapCamera.transform.position.y / _baseScaleFactor;
-		_spawnScale = currentScale * markerScale;
-
-		// move map camera towards base marker
-		_mapCamera.transform.position += (_cameraDiff * Time.deltaTime / _cameraMovePeriod);
-
-		// set location for markers
+		//	SET MARKER LOCATIONS #################################################################################
 		int count = _spawnedObjects.Count;
 		for (int i = 0; i < count; i++)
 		{
@@ -89,27 +130,127 @@ public class SpawnOnMapCustom : MonoBehaviour
 			var location = _locations[i];
 
 			Vector3 rawPosition = _map.GeoToWorldPosition(_locations[i], true);
-			spawnedObject.transform.localPosition = new Vector3(rawPosition.x, yPosition, rawPosition.z);
+			spawnedObject.transform.localPosition = new Vector3(rawPosition.x, _yPosition, rawPosition.z);
 			//instance.transform.localPosition = _map.GeoToWorldPosition(_locations[i], true);
 
 			spawnedObject.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 		}
+		//	#########################################################################################################
 	}
 
 	// assign random lat long periodically
 	void SetBasePosition()
     {
+		// BASE LOCATION
 		// 37.05706, 35.36111, around this point
-		// create location string and set to the locations
-		var latitude = Random.Range(37.05681f, 37.05731f).ToString().Replace(',', '.');
-		var longitude = Random.Range(35.36076f, 35.36146f).ToString().Replace(',', '.');
+		var latitudeBase = Random.Range(37.05691f, 37.05721f).ToString().Replace(',', '.');
+		var longitudeBase = Random.Range(35.36086f, 35.36136f).ToString().Replace(',', '.');
 
-		Vector2d nextLocation = Conversions.StringToLatLon(latitude + "," + longitude);
-		_diffValues[0] = nextLocation - _locations[0];
-
-		// set next camera position with base position update
-		Vector3 tempPos = _map.GeoToWorldPosition(nextLocation, false);
-		Vector3 nextCamPos = new Vector3(tempPos.x, _mapCamera.transform.position.y, tempPos.z);
-		_cameraDiff = nextCamPos - _mapCamera.transform.position;
+		Vector2d nextLocationBase = Conversions.StringToLatLon(latitudeBase + "," + longitudeBase);
+		_diffValues[0] = nextLocationBase - _locations[0];
 	}
 }
+
+
+
+
+
+/*
+
+		// CAMERA ZOOM ##############################################################################
+		// get zoom level
+		double distanceLat = Mathd.Abs(_locations[1].x - _locations[0].x);
+		double distanceLong = Mathd.Abs(_locations[1].y - _locations[0].y);
+		int divideLat = (int) (distanceLat / _verticalBound) + 1;
+		int divideLong = (int) (distanceLong / _horizontalBound) + 1;
+		_zoomTargetIndex = divideLat;
+		if (divideLong > divideLat)
+			_zoomTargetIndex = divideLong;
+		// get camera Y target and current values
+		float camYTarget = _zoomTargetIndex * _baseScaleFactor;
+		float currentYValue = _mapCamera.transform.position.y;
+		
+		if(Mathf.Abs(camYTarget-currentYValue)>= _verticalBound && _setCamYDiff == false)
+        {
+			_setCamYDiff = true;
+			_camYDiff = camYTarget - currentYValue;
+		}
+		// set new y value for map camera
+		if( ((camYTarget - currentYValue) * _camYDiff) <= 0f)
+        {
+			// set target to current value to make it precise
+			//Vector3 valueToSet = _mapCamera.transform.position;
+			//valueToSet.y = camYTarget;
+			//_mapCamera.transform.position = valueToSet;
+			_camYDiff = 0f;
+			_setCamYDiff = false;
+		}
+        else
+			_mapCamera.transform.position += new Vector3(0f, _camYDiff * Time.deltaTime / _zoomSetTime, 0f);
+		// ################################################################################################### 
+ 
+*/
+
+
+/*		BASE POSITION SET CODE 
+ *		
+			// CAMERA TO BASE LOCATION
+		Vector3 tempPos = _map.GeoToWorldPosition(nextLocationBase, false);
+		Vector3 nextCamPos = new Vector3(tempPos.x, _mapCamera.transform.position.y, tempPos.z);
+		_cameraMoveDiff = nextCamPos - _mapCamera.transform.position;
+
+		// ADD ZOOM ACTION DEPENDING ON THE CAMERA CENTER NOT BASE LOCATION
+		double distanceLat = Mathd.Abs(_locations[1].x - _locations[0].x);
+		double distanceLong = Mathd.Abs(_locations[1].y - _locations[0].y);
+		int divideLat = (int)(distanceLat / _verticalBound) + 1;
+		int divideLong = (int)(distanceLong / _horizontalBound) + 1;
+		int zoomTargetIndex = divideLat;
+		if (divideLong > divideLat)
+			zoomTargetIndex = divideLong;
+		int zoomDiff = zoomTargetIndex - _zoomLevel;
+		for(int i=0; i<(Mathd.Abs(zoomDiff)); i++)
+        {
+			if (zoomDiff > 0)
+				_zoomActions.Add(ZoomAction.ZoomOut);
+			else if (zoomDiff < 0)
+				_zoomActions.Add(ZoomAction.ZoomIn);	
+        }
+		_zoomLevel = zoomTargetIndex;
+
+
+		CODE USED TO BE IN UPDATE
+
+		// FOLLOW BASE MARKER
+		_mapCamera.transform.position += (_cameraMoveDiff * Time.deltaTime / _cameraMovePeriod);
+
+
+		// APPLY CAMERA ZOOM ACTIONS ######################################################################
+		if(_zoomActions.Count > 0)
+        {
+			if(actionStarted == false)
+            {
+				actionStarted = true;
+				initialYPos = _mapCamera.transform.position.y;
+			}	
+			
+			ZoomAction currentAction = _zoomActions[0];
+			int dir = 1;
+
+			if (currentAction == ZoomAction.ZoomOut)
+				dir = 1;
+			else
+				dir = -1;
+
+			_mapCamera.transform.position += new Vector3(0f, dir * _baseScaleFactor * Time.deltaTime / _zoomSetTime, 0f);
+			float targetValue = initialYPos + dir * _baseScaleFactor;
+			float currentValue = _mapCamera.transform.position.y;
+			if (((targetValue - currentValue) * dir) < 0f)
+            {
+				_mapCamera.transform.position = new Vector3(_mapCamera.transform.position.x, targetValue, 
+						_mapCamera.transform.position.z);
+				actionStarted = false;
+				_zoomActions.RemoveAt(0);
+			}
+		}
+		//	############################################################################################################
+*/

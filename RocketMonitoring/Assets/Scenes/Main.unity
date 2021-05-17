@@ -478,14 +478,18 @@ MonoBehaviour:
   _map: {fileID: 252554869}
   _locationStrings:
   - 37.05706, 35.36111
+  - 37.05706, 35.36111
   _spawnScale: 10
-  _markerPrefab: {fileID: 7352879585568893691, guid: 2bd6acd36da64c64e99174d36464b08b,
+  _markerPrefab: {fileID: 162179334855702833, guid: f2b9202afff1be342a85159c9563996d,
     type: 3}
   _mapCamera: {fileID: 1959372932}
-  _cameraMovePeriod: 1
-  baseSetPeriod: 0.5
-  yPosition: 10
-  markerScale: 8
+  _cameraMovePeriod: 2
+  _horizontalBound: 0.0007
+  _verticalBound: 0.0005
+  _zoomSetTime: 1
+  _baseSetPeriod: 0.5
+  _yPosition: 10
+  _markerScale: 6
 --- !u!1 &261092596
 GameObject:
   m_ObjectHideFlags: 0
