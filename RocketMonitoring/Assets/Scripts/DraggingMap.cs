@@ -26,8 +26,6 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
             dragX = normalizedPoint.x;
             dragZ = normalizedPoint.y;
         }
-
-        Debug.Log("mouse in: " + isMouseInRegion);
     }
 
 

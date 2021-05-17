@@ -49,6 +49,9 @@ public class SpawnOnMapCustom : MonoBehaviour
 	float currentDragX = 0f;
 	float currentDragZ = 0f;
 
+	[Header("Scroll Wheel Sensitivity")]
+	[SerializeField] float sensitivityValue = 10f;
+
 	void Start()
 	{
 		// set proper scale for markers on map, 
@@ -76,6 +79,20 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 	private void Update()
 	{
+		// get scroll wheel data and assign to map camera y
+		float scrollWheel = Input.GetAxis("Mouse ScrollWheel");
+		if(scrollWheel < 0f && DraggingMap.isMouseInRegion)
+        {
+			if (_mapCamera.transform.position.y < 400f)
+				_mapCamera.transform.position += new Vector3(0f, sensitivityValue, 0f);
+		}
+		if(scrollWheel > 0f && DraggingMap.isMouseInRegion)
+        {
+			if (_mapCamera.transform.position.y > 50f)
+				_mapCamera.transform.position -= new Vector3(0f, sensitivityValue, 0f);
+
+		}
+
 		// current camera scale
 		float currentScale = _mapCamera.transform.position.y / _baseScaleFactor;
 		_spawnScale = currentScale * _markerScale;
