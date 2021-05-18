@@ -43,6 +43,16 @@ public class DisplayData : MonoBehaviour
     [SerializeField]
     TextMeshProUGUI textAltitude;
 
+    [Header("Parachute Displays")]
+    [SerializeField]
+    Image firstParachute;
+    [SerializeField]
+    Image secondParachute;
+    [SerializeField]
+    Color defaultColor;
+    [SerializeField]
+    Color greenColor;
+
     void Start()
     {
         sp.Open();
@@ -98,6 +108,20 @@ public class DisplayData : MonoBehaviour
                     // assign rotation directions string on the RocketController.cs, 4
                     string[] RPstrings = datas[4].Split(',');
                     RocketController.instance.RotateRocket(RPstrings[0], RPstrings[1]);
+
+                    // parachute displays, 5 and 6
+                    // 1st
+                    if (datas[5] == "1")
+                        firstParachute.color = greenColor;
+                    else if (datas[5] == "0")
+                        firstParachute.color = defaultColor;
+                    // 2nd
+                    if (datas[6] == "1")
+                        secondParachute.color = greenColor;
+                    else if (datas[6] == "0")
+                        secondParachute.color = defaultColor;
+
+
                 }
             }
             catch (System.Exception)
