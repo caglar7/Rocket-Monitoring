@@ -34,6 +34,11 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 	[Header("Map Camera Parameters")]
 	[SerializeField] Camera _mapCamera;
+	[SerializeField] float _initialCameraSetTime = 2f;
+	Vector3 _cameraTargetPos;
+	Vector3 _cameraDiff;
+	bool _setCameraToBase = false;
+	bool _setCameraTarget = false;
 
 	[Header("Marker Parameters")]
 	[SerializeField] float _locationSetPeriod = 0.5f;		// this should match with data retrive period
@@ -42,12 +47,12 @@ public class SpawnOnMapCustom : MonoBehaviour
 	float _baseScaleFactor = 50f;
 	Vector2d[] _diffValues;
 
-	const float WIDTH = 51.32f;
-	const float HEIGHT = 45.92f;
-	float prevDragX = 0f;
-	float prevDragZ = 0f;
-	float currentDragX = 0f;
-	float currentDragZ = 0f;
+	const float _WIDTH = 51.32f;
+	const float _HEIGHT = 45.92f;
+	float _prevDragX = 0f;
+	float _prevDragZ = 0f;
+	float _currentDragX = 0f;
+	float _currentDragZ = 0f;
 
 	[Header("Scroll Wheel Sensitivity")]
 	[SerializeField] float sensitivityValue = 10f;
@@ -85,6 +90,23 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 	private void Update()
 	{
+		// SET INITIAL CAMERA POSITION ONCE
+		if(_setCameraToBase == false && _setCameraTarget == true)
+        {
+			_mapCamera.transform.position += (_cameraDiff * Time.deltaTime / _initialCameraSetTime);
+			float currentX = _mapCamera.transform.position.x;
+			float currentZ = _mapCamera.transform.position.z;
+			if( (((_cameraTargetPos.x - currentX) * _cameraDiff.x) <= 0f) &&
+				(((_cameraTargetPos.z - currentZ) * _cameraDiff.z) <= 0f) )
+            {
+				// stop here
+				_mapCamera.transform.position = _cameraTargetPos;
+				_setCameraToBase = true;
+				Debug.Log("camera set to base position");
+			}
+			Debug.Log("camera current x y z: " + currentX + ":" + _mapCamera.transform.position.y + ":" + currentZ);
+        }
+
 		// get scroll wheel data and assign to map camera y
 		float scrollWheel = Input.GetAxis("Mouse ScrollWheel");
 		if(scrollWheel < 0f && DraggingMap.isMouseInRegion)
@@ -107,24 +129,24 @@ public class SpawnOnMapCustom : MonoBehaviour
 		// MOVE CAMERA WITH MOUSE DRAG ###############################################################
 		if (DraggingMap.isDragging)
         {
-			prevDragX = currentDragX;
-			currentDragX = DraggingMap.dragX;
-			float diff1 = prevDragX - currentDragX;
-			if(prevDragX != 0f && currentDragX != 0f)
-				_mapCamera.transform.position += new Vector3(diff1 * currentScale * WIDTH, 0f, 0f);
+			_prevDragX = _currentDragX;
+			_currentDragX = DraggingMap.dragX;
+			float diff1 = _prevDragX - _currentDragX;
+			if(_prevDragX != 0f && _currentDragX != 0f)
+				_mapCamera.transform.position += new Vector3(diff1 * currentScale * _WIDTH, 0f, 0f);
 
-			prevDragZ = currentDragZ;
-			currentDragZ = DraggingMap.dragZ;
-			float diff2 = prevDragZ - currentDragZ;
-			if(prevDragZ != 0f && currentDragZ != 0f)
-				_mapCamera.transform.position += new Vector3(0f, 0f, diff2 * currentScale * HEIGHT);
+			_prevDragZ = _currentDragZ;
+			_currentDragZ = DraggingMap.dragZ;
+			float diff2 = _prevDragZ - _currentDragZ;
+			if(_prevDragZ != 0f && _currentDragZ != 0f)
+				_mapCamera.transform.position += new Vector3(0f, 0f, diff2 * currentScale * _HEIGHT);
 		}
 		else
         {
-			prevDragX = 0f;
-			currentDragX = 0f;
-			prevDragZ = 0f;
-			currentDragZ = 0f;
+			_prevDragX = 0f;
+			_currentDragX = 0f;
+			_prevDragZ = 0f;
+			_currentDragZ = 0f;
         }
 		// ###################################################################################################
 
@@ -145,8 +167,6 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 			Vector3 rawPosition = _map.GeoToWorldPosition(_locations[i], true);
 			spawnedObject.transform.localPosition = new Vector3(rawPosition.x, _yPosition, rawPosition.z);
-			//instance.transform.localPosition = _map.GeoToWorldPosition(_locations[i], true);
-
 			spawnedObject.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 		}
 		//	#########################################################################################################
@@ -158,6 +178,20 @@ public class SpawnOnMapCustom : MonoBehaviour
 		// assign location difference
 		Vector2d nextBasePosition = Conversions.StringToLatLon(locString);
 		_diffValues[0] = nextBasePosition - _locations[0];
+
+		// set camera target and initial positions
+		if(_setCameraTarget == false)
+        {
+			Debug.Log("camera set target");
+			_setCameraTarget = true;
+			Vector3 tempWorldPos = _map.GeoToWorldPosition(nextBasePosition, true);
+			_cameraTargetPos = new Vector3(tempWorldPos.x, _baseScaleFactor, tempWorldPos.z);
+			Vector3 camInit = new Vector3(_mapCamera.transform.position.x, _baseScaleFactor, _mapCamera.transform.position.z);
+			_cameraDiff = _cameraTargetPos - camInit;
+			Debug.Log("next base lat: " + nextBasePosition.x + "  | long: " + nextBasePosition.y);
+			Debug.Log("camera target x y z: " + _cameraTargetPos.x + ":" + _cameraTargetPos.y + ":" + _cameraTargetPos.z);
+			Debug.Log("cam init x y z: " + camInit.x + ":" + camInit.y + ":" + camInit.z);
+        }
 	}
 
 	public void SetRocketPosition(string locString)
