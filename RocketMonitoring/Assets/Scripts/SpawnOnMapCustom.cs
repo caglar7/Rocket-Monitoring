@@ -14,6 +14,8 @@ public enum ZoomAction{
 
 public class SpawnOnMapCustom : MonoBehaviour
 {
+	public static SpawnOnMapCustom instance;
+
 	[SerializeField]
 	AbstractMap _map;
 
@@ -21,8 +23,6 @@ public class SpawnOnMapCustom : MonoBehaviour
 	[Geocode]
 	string[] _locationStrings;
 	Vector2d[] _locations;
-	// for smooth locations changes 
-	Vector2d[] _diffValues;
 
 	[SerializeField]
 	float _spawnScale = 1f;
@@ -36,11 +36,11 @@ public class SpawnOnMapCustom : MonoBehaviour
 	[SerializeField] Camera _mapCamera;
 
 	[Header("Marker Parameters")]
-	[SerializeField] float _baseSetPeriod = 0.5f;
-	float _timeRemaining = 0f;
+	[SerializeField] float _locationSetPeriod = 0.5f;		// this should match with data retrive period
 	[SerializeField] float _yPosition = 10f;
 	[SerializeField] float _markerScale = 1f;
 	float _baseScaleFactor = 50f;
+	Vector2d[] _diffValues;
 
 	const float WIDTH = 51.32f;
 	const float HEIGHT = 45.92f;
@@ -51,6 +51,14 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 	[Header("Scroll Wheel Sensitivity")]
 	[SerializeField] float sensitivityValue = 10f;
+
+	void Awake()
+	{
+		if (instance == null)
+			instance = this;
+		else if (instance != this)
+			Destroy(gameObject);
+	}
 
 	void Start()
 	{
@@ -70,8 +78,6 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 			Vector3 rawPosition = _map.GeoToWorldPosition(_locations[i], true);
 			instance.transform.localPosition = new Vector3(rawPosition.x, _yPosition, rawPosition.z);
-			//instance.transform.localPosition = _map.GeoToWorldPosition(_locations[i], true);
-
 			instance.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 			_spawnedObjects.Add(instance);
 		}
@@ -122,21 +128,12 @@ public class SpawnOnMapCustom : MonoBehaviour
         }
 		// ###################################################################################################
 
+		// location adding doesn't check if it reaches the target point, check it out
+		// BASE POSITION SMOOTH UPDATE
+		_locations[0] += (_diffValues[0] * Time.deltaTime / _locationSetPeriod);
 
-		// set position every 0.5 secs
-		_timeRemaining -= Time.deltaTime;
-        if (_timeRemaining <= 0f)
-        {
-            _timeRemaining = _baseSetPeriod;
-			SetBasePosition();
-        }
-        _locations[0] += (_diffValues[0] * Time.deltaTime / _baseSetPeriod);
-
-		// rocket position
-		float horizontal = Input.GetAxis("Horizontal");
-		float vertical = Input.GetAxis("Vertical");
-		_locations[1].x += (vertical * 0.00100f * Time.deltaTime);
-		_locations[1].y += (horizontal * 0.00100f * Time.deltaTime);
+		// ROCKET POSITION SMOOTH UPDATE
+		_locations[1] += (_diffValues[1] * Time.deltaTime / _locationSetPeriod);
 
 
 		//	SET MARKER LOCATIONS #################################################################################
@@ -156,16 +153,22 @@ public class SpawnOnMapCustom : MonoBehaviour
 	}
 
 	// assign random lat long periodically
-	void SetBasePosition()
+	public void SetBasePosition(string locString)
     {
-		// BASE LOCATION
-		// 37.05706, 35.36111, around this point
-		var latitudeBase = Random.Range(37.05691f, 37.05721f).ToString().Replace(',', '.');
-		var longitudeBase = Random.Range(35.36086f, 35.36136f).ToString().Replace(',', '.');
-
-		Vector2d nextLocationBase = Conversions.StringToLatLon(latitudeBase + "," + longitudeBase);
-		_diffValues[0] = nextLocationBase - _locations[0];
+		// assign location difference
+		Vector2d nextBasePosition = Conversions.StringToLatLon(locString);
+		_diffValues[0] = nextBasePosition - _locations[0];
 	}
+
+	public void SetRocketPosition(string locString)
+    {
+		// assign location difference
+		Vector2d nextRocketPosition = Conversions.StringToLatLon(locString);
+		_diffValues[1] = nextRocketPosition - _locations[1];
+	}
+
+	// create AvionicBay location set method later
+	// ...
 }
 
 

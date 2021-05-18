@@ -121,7 +121,10 @@ public class DisplayData : MonoBehaviour
                     else if (datas[6] == "0")
                         secondParachute.color = defaultColor;
 
-
+                    // pass lat long to the map script, base 7 8, rocket 0 1
+                    SpawnOnMapCustom.instance.SetBasePosition(datas[7] + "," + datas[8]);
+                    SpawnOnMapCustom.instance.SetRocketPosition(datas[0] + "," + datas[1]);
+                    
                 }
             }
             catch (System.Exception)
