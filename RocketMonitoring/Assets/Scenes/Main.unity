@@ -479,17 +479,15 @@ MonoBehaviour:
   _locationStrings:
   - 37.05706, 35.36111
   - 37.05706, 35.36111
-  _spawnScale: 10
-  _markerPrefab: {fileID: 162179334855702833, guid: f2b9202afff1be342a85159c9563996d,
-    type: 3}
+  _spawnScale: 1
+  _markerPrefabs:
+  - {fileID: 162179334855702833, guid: f2b9202afff1be342a85159c9563996d, type: 3}
+  - {fileID: 7352879585568893691, guid: 2bd6acd36da64c64e99174d36464b08b, type: 3}
   _mapCamera: {fileID: 1959372932}
-  _cameraMovePeriod: 2
-  _horizontalBound: 0.0007
-  _verticalBound: 0.0005
-  _zoomSetTime: 1
   _baseSetPeriod: 0.5
   _yPosition: 10
   _markerScale: 6
+  sensitivityValue: 10
 --- !u!1 &261092596
 GameObject:
   m_ObjectHideFlags: 0
@@ -901,7 +899,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1367,6 +1365,7 @@ GameObject:
   - component: {fileID: 632188251}
   - component: {fileID: 632188253}
   - component: {fileID: 632188252}
+  - component: {fileID: 632188254}
   m_Layer: 5
   m_Name: MiniMap
   m_TagString: Untagged
@@ -1407,7 +1406,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1426,6 +1425,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 632188250}
   m_CullTransparentMesh: 0
+--- !u!114 &632188254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 632188250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0206cee6b32cdcb4c87a23c224e88b75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -4964,7 +4975,7 @@ MonoBehaviour:
   pinTransform: {fileID: 1495567763}
   MIN_ANGLE: 108
   MAX_ANGLE: -107.5
-  MAX_SPEED: 240
+  MAX_SPEED: 300
   speed: 0
   speedTarget: 0
   speedSetTime: 0.5

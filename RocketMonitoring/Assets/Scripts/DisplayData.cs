@@ -93,8 +93,7 @@ public class DisplayData : MonoBehaviour
 
                     // velocity unit conversion and set on speedometer, 3
                     float speedData_meters = float.Parse(datas[3]) / 100f;
-                    float speedData_km = speedData_meters * 3600f / 1000f;
-                    speedometer.SetSpeed(speedData_km);
+                    speedometer.SetSpeed(speedData_meters);
 
                     // assign rotation directions string on the RocketController.cs, 4
                     string[] RPstrings = datas[4].Split(',');

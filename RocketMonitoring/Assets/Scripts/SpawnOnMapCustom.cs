@@ -28,7 +28,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 	float _spawnScale = 1f;
 
 	[SerializeField]
-	GameObject _markerPrefab;
+	GameObject[] _markerPrefabs;
 
 	List<GameObject> _spawnedObjects;
 
@@ -66,7 +66,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 		{
 			var locationString = _locationStrings[i];
 			_locations[i] = Conversions.StringToLatLon(locationString);
-			var instance = Instantiate(_markerPrefab);
+			var instance = Instantiate(_markerPrefabs[i]);
 
 			Vector3 rawPosition = _map.GeoToWorldPosition(_locations[i], true);
 			instance.transform.localPosition = new Vector3(rawPosition.x, _yPosition, rawPosition.z);
