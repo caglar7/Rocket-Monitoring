@@ -2,7 +2,7 @@
 using System.IO.Ports;
 using UnityEngine.UI;
 using TMPro;
-
+using System;
 
 // DISPLAYED DATA
 // LAT LONG A V FRT SND LAT_B LONG_B
@@ -53,6 +53,8 @@ public class DisplayData : MonoBehaviour
     [SerializeField]
     Color greenColor;
 
+    bool dataFirstObtained = false;
+
     void Start()
     {
         sp.Open();
@@ -97,6 +99,13 @@ public class DisplayData : MonoBehaviour
                 // if data is valid, do something
                 if (checkValidFirst && checkValidSecond)
                 {
+                    if(dataFirstObtained == false)
+                    {
+                        dataFirstObtained = true;
+                        string timeString = DateTime.Now.ToString();
+                        LogManager.instance.SendMessageToLog(timeString + "First Data is obtained.");
+                    }
+
                     // altitude display, convert float then format to proper string
                     float altitudeData = float.Parse(datas[2]) / 100f;
                     textAltitude.text = altitudeData.ToString();
