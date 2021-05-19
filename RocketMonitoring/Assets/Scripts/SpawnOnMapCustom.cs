@@ -102,9 +102,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 				// stop here
 				_mapCamera.transform.position = _cameraTargetPos;
 				_setCameraToBase = true;
-				Debug.Log("camera set to base position");
 			}
-			Debug.Log("camera current x y z: " + currentX + ":" + _mapCamera.transform.position.y + ":" + currentZ);
         }
 
 		// get scroll wheel data and assign to map camera y
@@ -182,15 +180,11 @@ public class SpawnOnMapCustom : MonoBehaviour
 		// set camera target and initial positions
 		if(_setCameraTarget == false)
         {
-			Debug.Log("camera set target");
 			_setCameraTarget = true;
 			Vector3 tempWorldPos = _map.GeoToWorldPosition(nextBasePosition, true);
 			_cameraTargetPos = new Vector3(tempWorldPos.x, _baseScaleFactor, tempWorldPos.z);
 			Vector3 camInit = new Vector3(_mapCamera.transform.position.x, _baseScaleFactor, _mapCamera.transform.position.z);
 			_cameraDiff = _cameraTargetPos - camInit;
-			Debug.Log("next base lat: " + nextBasePosition.x + "  | long: " + nextBasePosition.y);
-			Debug.Log("camera target x y z: " + _cameraTargetPos.x + ":" + _cameraTargetPos.y + ":" + _cameraTargetPos.z);
-			Debug.Log("cam init x y z: " + camInit.x + ":" + camInit.y + ":" + camInit.z);
         }
 	}
 
