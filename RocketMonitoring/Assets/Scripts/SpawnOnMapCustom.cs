@@ -102,6 +102,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 				// stop here
 				_mapCamera.transform.position = _cameraTargetPos;
 				_setCameraToBase = true;
+				LogManager.instance.SendMessageToLog("Map is loaded");
 			}
         }
 

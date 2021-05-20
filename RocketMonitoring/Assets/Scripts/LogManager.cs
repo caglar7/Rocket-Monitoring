@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class LogManager : MonoBehaviour
 {
@@ -24,7 +25,15 @@ public class LogManager : MonoBehaviour
     [Header("Log Menu Parameters")]
     [SerializeField] List<Message> messageList = new List<Message>();
     [SerializeField] int maxMessageAmount = 20;
-    [SerializeField] GameObject chatPanel, textObject; 
+    [SerializeField] GameObject chatPanel, textObject;
+
+    void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else if (instance != this)
+            Destroy(gameObject);
+    }
 
     void Start()
     {
@@ -71,7 +80,7 @@ public class LogManager : MonoBehaviour
         newMessage.text = text;
 
         GameObject newText = Instantiate(textObject, chatPanel.transform);
-        newMessage.textObject = newText.GetComponent<Text>();
+        newMessage.textObject = newText.GetComponent<TextMeshProUGUI>();
         newMessage.textObject.text = newMessage.text;
 
         messageList.Add(newMessage);
@@ -82,5 +91,5 @@ public class LogManager : MonoBehaviour
 public class Message
 {
     public string text;
-    public Text textObject;
+    public TextMeshProUGUI textObject;
 }

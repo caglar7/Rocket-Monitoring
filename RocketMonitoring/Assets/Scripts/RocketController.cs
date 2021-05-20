@@ -92,5 +92,6 @@ public class RocketController : MonoBehaviour
     {
         GetComponent<MeshRenderer>().material = rocketMaterials[index];
         materialSelected = index;
+        LogManager.instance.SendMessageToLog("Rocket Model " + index + " is selected");
     }
 }

@@ -102,8 +102,7 @@ public class DisplayData : MonoBehaviour
                     if(dataFirstObtained == false)
                     {
                         dataFirstObtained = true;
-                        string timeString = DateTime.Now.ToString();
-                        LogManager.instance.SendMessageToLog(timeString + "First Data is obtained.");
+                        LogManager.instance.SendMessageToLog("First Data is obtained");
                     }
 
                     // altitude display, convert float then format to proper string
@@ -134,6 +133,10 @@ public class DisplayData : MonoBehaviour
                     SpawnOnMapCustom.instance.SetBasePosition(datas[7] + "," + datas[8]);
                     SpawnOnMapCustom.instance.SetRocketPosition(datas[0] + "," + datas[1]);
                     
+                }
+                else
+                {
+                    LogManager.instance.SendMessageToLog("Data could not be obtained");
                 }
             }
             catch (System.Exception)
