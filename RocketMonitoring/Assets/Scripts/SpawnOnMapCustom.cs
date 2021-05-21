@@ -5,8 +5,6 @@ using Mapbox.Unity.MeshGeneration.Factories;
 using Mapbox.Unity.Utilities;
 using System.Collections.Generic;
 
-// vectors have only 1 value for now, 0 index only
-
 public enum ZoomAction{
 	ZoomIn,
 	ZoomOut

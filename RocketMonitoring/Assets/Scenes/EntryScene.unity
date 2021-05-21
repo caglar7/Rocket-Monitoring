@@ -2920,8 +2920,6 @@ MonoBehaviour:
       m_Image: {fileID: 0}
     - m_Text: COM3
       m_Image: {fileID: 0}
-    - m_Text: COM3
-      m_Image: {fileID: 0}
     - m_Text: COM4
       m_Image: {fileID: 0}
     - m_Text: COM5
