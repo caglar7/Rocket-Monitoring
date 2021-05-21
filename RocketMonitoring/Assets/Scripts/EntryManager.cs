@@ -11,6 +11,7 @@ public class EntryManager : MonoBehaviour
     public static string dataCOM = "";
     public static int dataBaudRate = 9600;
     public static float dataObtainPeriod = 500f;
+    public static string warningString;
 
     [SerializeField]
     TMP_Dropdown dropDown_Ports;
@@ -21,28 +22,31 @@ public class EntryManager : MonoBehaviour
     [SerializeField]
     TMP_InputField inputField_Period;
 
+    [SerializeField]
+    GameObject warningToolTip;
+
+    [SerializeField]
+    Canvas canvas;
+
     // check bools
     bool checkCOMPort;
     bool checkDataPeriod;
-
-    // check data
-    string[] ports;
 
     void Start()
     {
         // set initial values
         dropDown_BaudRates.value = 5;
-        inputField_Period.text = "500";
     }
 
     public void TrySwitchScene()
     {
         // CHECK INPUTS ------------------------------------------------------
+        warningString = "";
         // ports
         checkCOMPort = false;
         int portIndex = dropDown_Ports.value;
         string portSelected = dropDown_Ports.options[portIndex].text;
-        ports = SerialPort.GetPortNames();
+        string[] ports = SerialPort.GetPortNames();
         foreach (string port in ports)
         {
             if (portSelected == port)
@@ -52,7 +56,7 @@ public class EntryManager : MonoBehaviour
             }
         }
         if (checkCOMPort == false)
-            Debug.Log("COM port does not match");
+            warningString += "- COM Port does not match!\n";
         // data period
         checkDataPeriod = true;
         string dataPeriod_Raw = inputField_Period.text;
@@ -61,14 +65,14 @@ public class EntryManager : MonoBehaviour
             if(!char.IsDigit(c))
             {
                 checkDataPeriod = false;
-                Debug.Log("Data period must be integer");
+                warningString += "- Data Period must be integer!\n";
                 break;
             }
         }
         if (dataPeriod_Raw == "")
         {
             checkDataPeriod = false;
-            Debug.Log("Enter Data period");
+            warningString += "- Enter Data Period!\n";
         }
         // CHECKS ARE DONE --------------------------------------------------   END
 
@@ -77,6 +81,8 @@ public class EntryManager : MonoBehaviour
         if(checkCOMPort == false || checkDataPeriod == false)
         {
             // show warning toolbar here, get rid of debugs and put a menu item
+            GameObject toolTip = Instantiate(warningToolTip, canvas.transform);
+            Destroy(toolTip, 3f);
             return;
         }
         // -----------------------------------------------------------------    END
