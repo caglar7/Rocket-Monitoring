@@ -3655,7 +3655,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b9b2ab060d550d4bb13281b6ab7e3a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  readPeriod: 0.5
   speedometer: {fileID: 2095903056}
   textAltitude: {fileID: 1729521399}
   firstParachute: {fileID: 768818574}
@@ -4954,7 +4953,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1959372930}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -971, y: 50, z: 821}
+  m_LocalPosition: {x: -971, y: 50, z: 794.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -5533,7 +5532,6 @@ MonoBehaviour:
   MAX_SPEED: 300
   speed: 0
   speedTarget: 0
-  speedSetTime: 0.5
   textSpeed: {fileID: 1993205683}
 --- !u!1 &2102975317
 GameObject:
@@ -5691,7 +5689,7 @@ PrefabInstance:
     - target: {fileID: 689652538130074402, guid: 44d07a955be2ddc4a9edece733f95fe5,
         type: 3}
       propertyPath: _previewOptions.isPreviewEnabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 689652538130074402, guid: 44d07a955be2ddc4a9edece733f95fe5,
         type: 3}

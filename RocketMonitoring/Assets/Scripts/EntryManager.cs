@@ -30,7 +30,9 @@ public class EntryManager : MonoBehaviour
 
     void Start()
     {
-
+        // set initial values
+        dropDown_BaudRates.value = 5;
+        inputField_Period.text = "500";
     }
 
     public void TrySwitchScene()
@@ -49,6 +51,8 @@ public class EntryManager : MonoBehaviour
                 break;
             }
         }
+        if (checkCOMPort == false)
+            Debug.Log("COM port does not match");
         // data period
         checkDataPeriod = true;
         string dataPeriod_Raw = inputField_Period.text;
@@ -72,7 +76,7 @@ public class EntryManager : MonoBehaviour
         // CHECK CONDITIONS ----------------------------------------------------
         if(checkCOMPort == false || checkDataPeriod == false)
         {
-            // show warning toolbar here
+            // show warning toolbar here, get rid of debugs and put a menu item
             return;
         }
         // -----------------------------------------------------------------    END
@@ -92,7 +96,7 @@ public class EntryManager : MonoBehaviour
         }
         dataBaudRate = Int32.Parse(baudRate_NoUnit);
         // data period
-        dataObtainPeriod = float.Parse(dataPeriod_Raw);
+        dataObtainPeriod = float.Parse(dataPeriod_Raw) / 1000f;
         // -------------------------------------------------------------------  END 
 
         // START NEXT SCENE

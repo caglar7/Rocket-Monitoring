@@ -20,15 +20,20 @@ public class SpeedometerController : MonoBehaviour
     private float speed = 0f;
     [SerializeField]
     private float speedTarget = 0f;
-    [SerializeField]
-    private float speedSetTime = 0.5f;
 
     [Header("Text Display")]
     [SerializeField]
     TextMeshProUGUI textSpeed;
 
     float speedDiff = 0f;
-    
+    float speedSetTime = 1f;
+
+    void Start()
+    {
+        // get data from EntryManager
+        speedSetTime = EntryManager.dataObtainPeriod;
+    }
+
     void Update()
     {
         // check if speed reached the target

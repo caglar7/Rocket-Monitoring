@@ -25,15 +25,13 @@ using System;
 public class DisplayData : MonoBehaviour
 {
     // com and baud rate later will initially selected 
-    SerialPort sp = new SerialPort("COM4", 9600);
+    SerialPort sp;
 
     bool readAvailable = true;
 
     // make sure this matches with arduino data transmission freq 
     float readPeriodRemaining;
-    [Header("Data Reading Period")]
-    [SerializeField]
-    float readPeriod = 0.2f;
+    float readPeriod = 1f;
 
     [Header("Velocity Parameters")]
     [SerializeField]
@@ -57,8 +55,12 @@ public class DisplayData : MonoBehaviour
 
     void Start()
     {
+        // assign data from EntryManager
+        readPeriod = EntryManager.dataObtainPeriod;
+        sp = new SerialPort(EntryManager.dataCOM, EntryManager.dataBaudRate);
         sp.Open();
         sp.ReadTimeout = 1;
+
         readPeriodRemaining = readPeriod;
     }
 
@@ -141,7 +143,7 @@ public class DisplayData : MonoBehaviour
             }
             catch (System.Exception)
             {
-
+                
             }
         }
     }

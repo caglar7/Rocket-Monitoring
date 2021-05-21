@@ -27,9 +27,7 @@ public class RocketController : MonoBehaviour
     float rollSet = 0f, pitchSet = 0f;
     public int materialSelected = 0;
 
-    [Header("Rocket Movement Elements")]
-    [SerializeField]
-    float angleSetTime = 0.1f;
+    float angleSetTime = 1f;
 
     [Header("Rocket Materials")]
     [SerializeField]
@@ -47,6 +45,7 @@ public class RocketController : MonoBehaviour
     void Start()
     {
         // set initial material
+        angleSetTime = EntryManager.dataObtainPeriod;
         SetRocketMaterial(0);
     }
 

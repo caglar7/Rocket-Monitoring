@@ -39,11 +39,11 @@ public class SpawnOnMapCustom : MonoBehaviour
 	bool _setCameraTarget = false;
 
 	[Header("Marker Parameters")]
-	[SerializeField] float _locationSetPeriod = 0.5f;		// this should match with data retrive period
 	[SerializeField] float _yPosition = 10f;
 	[SerializeField] float _markerScale = 1f;
 	float _baseScaleFactor = 50f;
 	Vector2d[] _diffValues;
+	float _locationSetPeriod = 1f; // matches with data obtain period
 
 	const float _WIDTH = 51.32f;
 	const float _HEIGHT = 45.92f;
@@ -65,6 +65,9 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 	void Start()
 	{
+		// get data from EntryManager
+		_locationSetPeriod = EntryManager.dataObtainPeriod;
+
 		// set proper scale for markers on map, 
 		float currentScale = _mapCamera.transform.position.y / _baseScaleFactor;
 		_spawnScale = currentScale * _markerScale;
