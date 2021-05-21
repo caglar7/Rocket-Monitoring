@@ -9,6 +9,10 @@ public class SceneTransitions : MonoBehaviour
     public float animationTime = 0.25f;
     Animator animator;
 
+    [SerializeField]
+    GameObject exitMenu;
+    bool isExitMenuActive = false;
+
     void Awake()
     {
         if (instance == null)
@@ -23,6 +27,18 @@ public class SceneTransitions : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
+        DeactivateExitMenu();
+    }
+
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (isExitMenuActive == false)
+                ActivateExitMenu();
+            else if (isExitMenuActive == true)
+                DeactivateExitMenu();
+        }
     }
 
 
@@ -36,5 +52,22 @@ public class SceneTransitions : MonoBehaviour
     {
         animator.SetBool("SceneEnd", false);
         animator.SetBool("SceneStart", true);
+    }
+
+    public void ActivateExitMenu()
+    {
+        exitMenu.gameObject.SetActive(true);
+        isExitMenuActive = true;
+    }
+
+    public void DeactivateExitMenu()
+    {
+        exitMenu.gameObject.SetActive(false);
+        isExitMenuActive = false;
+    }
+
+    public void ExitApplication()
+    {
+        Application.Quit();
     }
 }
