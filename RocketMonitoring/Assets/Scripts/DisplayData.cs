@@ -57,9 +57,11 @@ public class DisplayData : MonoBehaviour
     {
         // assign data from EntryManager
         readPeriod = EntryManager.dataObtainPeriod;
-        sp = new SerialPort(EntryManager.dataCOM, EntryManager.dataBaudRate);
+        StopBits stopBits = StopBits.One;
+        // set 0 8 stopbits later to test again
+        sp = new SerialPort(EntryManager.dataCOM, EntryManager.dataBaudRate, 0, 8, stopBits);
+        sp.ReadTimeout = 100;
         sp.Open();
-        sp.ReadTimeout = 1;
 
         readPeriodRemaining = readPeriod;
     }
@@ -84,14 +86,25 @@ public class DisplayData : MonoBehaviour
         {
             try
             {
-                string receivedData = sp.ReadLine();
+                string receivedData = "";
+
+                try
+                {
+                    receivedData = sp.ReadExisting();
+                    sp.BaseStream.Flush();
+                }
+                catch (Exception e)
+                {
+                    LogManager.instance.SendMessageToLog(e.Message);
+                }
+
                 string[] datas = receivedData.Split(':');
 
                 // data size is currently 9, check if it is
                 // also check if string length is proper, 55 for now
                 bool checkValidFirst = false;
                 bool checkValidSecond = false;
-                if(receivedData.Length > 55)
+                if(receivedData.Length > 35)
                 {
                     checkValidFirst = true;
                     if (datas.Length == 9)
@@ -134,7 +147,10 @@ public class DisplayData : MonoBehaviour
                     // pass lat long to the map script, base 7 8, rocket 0 1
                     SpawnOnMapCustom.instance.SetBasePosition(datas[7] + "," + datas[8]);
                     SpawnOnMapCustom.instance.SetRocketPosition(datas[0] + "," + datas[1]);
-                    
+
+                    // when data is valid, print it on log
+                    LogManager.instance.SendMessageToLog(receivedData);
+                    Debug.Log(receivedData);
                 }
                 else
                 {
