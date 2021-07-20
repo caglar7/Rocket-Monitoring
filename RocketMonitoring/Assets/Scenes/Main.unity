@@ -4953,7 +4953,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1959372930}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -971, y: 50, z: 794.9}
+  m_LocalPosition: {x: -592, y: 50, z: 11117}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -5700,6 +5700,16 @@ PrefabInstance:
         type: 3}
       propertyPath: _options.locationOptions.latitudeLongitude
       value: 37.05800, 35.36100
+      objectReference: {fileID: 0}
+    - target: {fileID: 689652538130074402, guid: 44d07a955be2ddc4a9edece733f95fe5,
+        type: 3}
+      propertyPath: _imagery._layerProperty.sourceType
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 689652538130074402, guid: 44d07a955be2ddc4a9edece733f95fe5,
+        type: 3}
+      propertyPath: _imagery._layerProperty.sourceOptions.layerSource.Id
+      value: mapbox://styles/cagmapwzz1/ckrc83sd419fq17nr59g7ws9a
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 44d07a955be2ddc4a9edece733f95fe5, type: 3}

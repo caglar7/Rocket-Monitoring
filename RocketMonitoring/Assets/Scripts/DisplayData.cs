@@ -149,8 +149,7 @@ public class DisplayData : MonoBehaviour
                     SpawnOnMapCustom.instance.SetRocketPosition(datas[0] + "," + datas[1]);
 
                     // when data is valid, print it on log
-                    LogManager.instance.SendMessageToLog(receivedData);
-                    Debug.Log(receivedData);
+                    //LogManager.instance.SendMessageToLog(receivedData);
                 }
                 else
                 {

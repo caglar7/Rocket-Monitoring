@@ -34,12 +34,14 @@ public class EntryManager : MonoBehaviour
 
     void Start()
     {
-        // set initial values
-        dropDown_BaudRates.value = 5;
+        // set initial values, for quick tests
+        dropDown_Ports.value = 3;
+        dropDown_BaudRates.value = 9;
+        inputField_Period.text = "500";
     }
 
     public void TrySwitchScene()
-    {
+    {  
         // CHECK INPUTS ------------------------------------------------------
         warningString = "";
         // ports
@@ -76,7 +78,6 @@ public class EntryManager : MonoBehaviour
         }
         // CHECKS ARE DONE --------------------------------------------------   END
 
-
         // CHECK CONDITIONS ----------------------------------------------------
         if(checkCOMPort == false || checkDataPeriod == false)
         {
@@ -86,7 +87,6 @@ public class EntryManager : MonoBehaviour
             return;
         }
         // -----------------------------------------------------------------    END
-
 
         // ASSIGN VALUES -------------------------------------------------------
         // port
