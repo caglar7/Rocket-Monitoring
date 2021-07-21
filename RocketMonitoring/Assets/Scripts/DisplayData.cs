@@ -1,37 +1,50 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 using System.IO.Ports;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Linq;
 
 // DISPLAYED DATA
 // LAT LONG A V FRT SND LAT_B LONG_B
 // FRT SND WILL TRIGGER ACTIONS ON THE ROCKET
 // ANGLE IS A STATIC VARIABLE ON THE ROCKETCONTROLLER, directions
 
-// DATA ORDER AND INDEXES, IN STRING ARRAY
+// DATA ORDER AND INDEXES, IN STRING ARRAY, A AND B ARE FOR VALID CHECK
 /*
-    LAT     0
-    LONG    1 
-    A       2
-    V       3
-    AN      4
-    FRT     5
-    SND     6
-    LAT_B   7
-    LONG_B  8
+    A       0
+    LAT     1
+    LONG    2 
+    A       3
+    V       4
+    AN      5
+    FRT     6
+    SND     7
+    LAT_B   8
+    LONG_B  9
+    B       10
 */
+
+public enum ErrorType
+{
+    Multiple,
+    NoDataShort,
+    NoDataLong,
+    FullHalf,
+    HalfFull,
+    OnlyHalfB,
+    OnlyHalfA,
+    HalfHalf
+}
 
 public class DisplayData : MonoBehaviour
 {
     // com and baud rate later will initially selected 
     SerialPort sp;
 
-    bool readAvailable = true;
-
-    // make sure this matches with arduino data transmission freq 
-    float readPeriodRemaining;
-    float readPeriod = 1f;
+    private bool readAvailable = true;
 
     [Header("Velocity Parameters")]
     [SerializeField]
@@ -51,7 +64,21 @@ public class DisplayData : MonoBehaviour
     [SerializeField]
     Color greenColor;
 
-    bool dataFirstObtained = false;
+    // CHECK CONDITIONS
+    private int dataSize = 11;
+    private bool dataFirstObtained = false;
+    private bool firstHalfSecondValid = false;
+    private bool firstValidSecondHalf = false;
+    private bool dataUsable = false;
+
+    // TIMER PARAMETERS
+    // make sure this matches with arduino data transmission freq 
+    private float readPeriodRemaining;
+    private float readPeriod = 1f;
+    // timer to check, no data time
+    private float periodNoDataLong = 4f;
+    private float timerNoData = 0f;
+    private bool startNoDataTimer = false;
 
     void Start()
     {
@@ -68,6 +95,13 @@ public class DisplayData : MonoBehaviour
 
     void Update()
     {
+        // TIMERS ---------------------------------------------------------------------------------
+        // start measuring time when there is no data
+        if(startNoDataTimer == true)
+        {
+            timerNoData += Time.deltaTime;
+        }
+
         readPeriodRemaining -= Time.deltaTime;
         if (readPeriodRemaining <= 0f)
         {
@@ -82,11 +116,15 @@ public class DisplayData : MonoBehaviour
         else
             return;
 
+        // -----------------------------------------------------------------------------------------
+
         if (sp.IsOpen)
         {
             try
             {
+                // get data ----------------------------------------------------------------------
                 string receivedData = "";
+                string correctData = "";
 
                 try
                 {
@@ -97,24 +135,36 @@ public class DisplayData : MonoBehaviour
                 {
                     LogManager.instance.SendMessageToLog(e.Message);
                 }
+                List<string> datasRaw = receivedData.Split(':').ToList();
+                List<string> datas = new List<string>();
 
-                string[] datas = receivedData.Split(':');
+                // --------------------------------------------------------------------------------
 
-                // data size is currently 9, check if it is
-                // also check if string length is proper, 55 for now
-                bool checkValidFirst = false;
-                bool checkValidSecond = false;
-                if(receivedData.Length > 35)
+
+                // valid check and extract proper data -----------------------------------------------
+                // data format -> A....B 
+
+                dataUsable = false;
+                firstValidSecondHalf = false;
+                firstHalfSecondValid = false;
+
+                if (datasRaw.Count == dataSize && datasRaw[0] == "A")
                 {
-                    checkValidFirst = true;
-                    if (datas.Length == 9)
-                        checkValidSecond = true;
+                    dataUsable = true;
+                    datas = datasRaw.GetRange(1, dataSize - 2);
+                }
+                else
+                {
+                    // debug error type with received string, to check if profiler is working correct
+                    ErrorCorrection(datasRaw);
                 }
 
+                // -----------------------------------------------------------------------------------
+
                 // if data is valid, do something
-                if (checkValidFirst && checkValidSecond)
+                if (dataUsable)
                 {
-                    if(dataFirstObtained == false)
+                    if (dataFirstObtained == false)
                     {
                         dataFirstObtained = true;
                         LogManager.instance.SendMessageToLog("First Data is obtained");
@@ -153,7 +203,7 @@ public class DisplayData : MonoBehaviour
                 }
                 else
                 {
-                    LogManager.instance.SendMessageToLog("Data could not be obtained");
+                    Debug.Log("Data Error: " + receivedData);
                 }
             }
             catch (System.Exception)
@@ -161,6 +211,13 @@ public class DisplayData : MonoBehaviour
                 
             }
         }
+    }
+
+    void ErrorCorrection(List<String> rawDataList)
+    {
+        ErrorType type;
+        
+        
     }
 }
 
