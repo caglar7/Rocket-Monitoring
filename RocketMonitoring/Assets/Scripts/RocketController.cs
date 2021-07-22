@@ -21,13 +21,18 @@ public class RocketController : MonoBehaviour
 {
     // static variable that's assigned from DisplayData.cs
     public static RocketController instance;
-    float rollCurrent = 0f, pitchCurrent = 0f;
-    float rollPrev = 0f, pitchPrev = 0f;
-    float rollDiff = 0f, pitchDiff = 0f;
-    float rollSet = 0f, pitchSet = 0f;
     public int materialSelected = 0;
+     
+    private float rollCurrent = 0f, pitchCurrent = 0f;
+    private float rollPrev = 0f, pitchPrev = 0f;
+    private float rollDiff = 0f, pitchDiff = 0f;
+    private float rollSet = 0f, pitchSet = 0f;
 
-    float angleSetTime = 1f;
+    private float angleSetTime = 1f;
+
+    // work on it later
+    // rotation only happens between specific angles, 2, 4, 6, 8 etc.
+    private float roundAngle = 2f;
 
     [Header("Rocket Materials")]
     [SerializeField]
@@ -78,7 +83,19 @@ public class RocketController : MonoBehaviour
 
         rollCurrent = float.Parse(rollString) / 100f;
         pitchCurrent = float.Parse(pitchString) / 100f;
-        
+
+        Debug.Log("BEFORE");
+        Debug.Log("Roll: " + rollCurrent);
+        Debug.Log("Pitch: " + pitchCurrent);
+
+        // round to proper angles
+        rollCurrent = RoundAngle(rollCurrent);
+        pitchCurrent = RoundAngle(pitchCurrent);
+
+        Debug.Log("AFTER");
+        Debug.Log("Roll: " + rollCurrent);
+        Debug.Log("Pitch: " + pitchCurrent);
+
         rollDiff = rollCurrent - rollPrev;
         pitchDiff = pitchCurrent - pitchPrev;
         
@@ -92,5 +109,16 @@ public class RocketController : MonoBehaviour
         GetComponent<MeshRenderer>().material = rocketMaterials[index];
         materialSelected = index;
         LogManager.instance.SendMessageToLog("Rocket Model " + index + " is selected");
+    }
+
+    private float RoundAngle(float angle)
+    {
+        float modValue = angle % roundAngle;
+        if (modValue == 0f)
+            return angle;
+
+        float signedRoundAngle = (angle > 0f) ? (roundAngle) : (-roundAngle);
+        float value = (Mathf.Abs(modValue) >= (roundAngle / 2f)) ? (signedRoundAngle - modValue) : (-modValue);
+        return angle + value;
     }
 }

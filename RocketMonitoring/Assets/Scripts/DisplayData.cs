@@ -152,11 +152,16 @@ public class DisplayData : MonoBehaviour
                 {
                     dataUsable = true;
                     datas = datasRaw.GetRange(1, dataSize - 2);
+
+                    // reset no data parameters since there is data
+                    timerNoData = 0f;
+                    startNoDataTimer = false;
                 }
                 else
                 {
+                    // work on this later
                     // debug error type with received string, to check if profiler is working correct
-                    ErrorCorrection(datasRaw);
+                    //ErrorCorrection(datasRaw, receivedData);
                 }
 
                 // -----------------------------------------------------------------------------------
@@ -203,7 +208,7 @@ public class DisplayData : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("Data Error: " + receivedData);
+                    //Debug.Log("Data Error: " + receivedData);
                 }
             }
             catch (System.Exception)
@@ -213,12 +218,27 @@ public class DisplayData : MonoBehaviour
         }
     }
 
-    void ErrorCorrection(List<String> rawDataList)
-    {
-        ErrorType type;
+    // work on this later
+    //void ErrorCorrection(List<String> rawDataList, string rawDataString)
+    //{
+    //    ErrorType type;
+
+    //    Debug.Log("Data Error: " + rawDataString);
+    //    if(rawDataString == null)
+    //    {
+    //        if (startNoDataTimer == false)
+    //            startNoDataTimer = true;
+
+    //        if (timerNoData >= periodNoDataLong)
+    //            type = ErrorType.NoDataLong;
+    //        else
+    //            type = ErrorType.NoDataShort;
+
+    //        Debug.Log("Error: " + type.ToString());
+    //        return;
+    //    }
         
-        
-    }
+    //}
 }
 
 
