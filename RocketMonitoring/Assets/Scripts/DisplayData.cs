@@ -36,7 +36,8 @@ public enum ErrorType
     HalfFull,
     OnlyHalfB,
     OnlyHalfA,
-    HalfHalf
+    HalfHalf,
+    UnDefined
 }
 
 public class DisplayData : MonoBehaviour
@@ -159,57 +160,56 @@ public class DisplayData : MonoBehaviour
                 }
                 else
                 {
-                    // work on this later
                     // debug error type with received string, to check if profiler is working correct
-                    //ErrorCorrection(datasRaw, receivedData);
+                    ErrorCorrection(receivedData);
                 }
 
                 // -----------------------------------------------------------------------------------
 
                 // if data is valid, do something
-                if (dataUsable)
-                {
-                    if (dataFirstObtained == false)
-                    {
-                        dataFirstObtained = true;
-                        LogManager.instance.SendMessageToLog("First Data is obtained");
-                    }
+                //if (dataUsable)
+                //{
+                //    if (dataFirstObtained == false)
+                //    {
+                //        dataFirstObtained = true;
+                //        LogManager.instance.SendMessageToLog("First Data is obtained");
+                //    }
 
-                    // altitude display, convert float then format to proper string
-                    float altitudeData = float.Parse(datas[2]) / 100f;
-                    textAltitude.text = altitudeData.ToString();
+                //    // altitude display, convert float then format to proper string
+                //    float altitudeData = float.Parse(datas[2]) / 100f;
+                //    textAltitude.text = altitudeData.ToString();
 
-                    // velocity unit conversion and set on speedometer, 3
-                    float speedData_meters = float.Parse(datas[3]) / 100f;
-                    speedometer.SetSpeed(speedData_meters);
+                //    // velocity unit conversion and set on speedometer, 3
+                //    float speedData_meters = float.Parse(datas[3]) / 100f;
+                //    speedometer.SetSpeed(speedData_meters);
 
-                    // assign rotation directions string on the RocketController.cs, 4
-                    string[] RPstrings = datas[4].Split(',');
-                    RocketController.instance.RotateRocket(RPstrings[0], RPstrings[1]);
+                //    // assign rotation directions string on the RocketController.cs, 4
+                //    string[] RPstrings = datas[4].Split(',');
+                //    RocketController.instance.RotateRocket(RPstrings[0], RPstrings[1]);
 
-                    // parachute displays, 5 and 6
-                    // 1st
-                    if (datas[5] == "1")
-                        firstParachute.color = greenColor;
-                    else if (datas[5] == "0")
-                        firstParachute.color = defaultColor;
-                    // 2nd
-                    if (datas[6] == "1")
-                        secondParachute.color = greenColor;
-                    else if (datas[6] == "0")
-                        secondParachute.color = defaultColor;
+                //    // parachute displays, 5 and 6
+                //    // 1st
+                //    if (datas[5] == "1")
+                //        firstParachute.color = greenColor;
+                //    else if (datas[5] == "0")
+                //        firstParachute.color = defaultColor;
+                //    // 2nd
+                //    if (datas[6] == "1")
+                //        secondParachute.color = greenColor;
+                //    else if (datas[6] == "0")
+                //        secondParachute.color = defaultColor;
 
-                    // pass lat long to the map script, base 7 8, rocket 0 1
-                    SpawnOnMapCustom.instance.SetBasePosition(datas[7] + "," + datas[8]);
-                    SpawnOnMapCustom.instance.SetRocketPosition(datas[0] + "," + datas[1]);
+                //    // pass lat long to the map script, base 7 8, rocket 0 1
+                //    SpawnOnMapCustom.instance.SetBasePosition(datas[7] + "," + datas[8]);
+                //    SpawnOnMapCustom.instance.SetRocketPosition(datas[0] + "," + datas[1]);
 
-                    // when data is valid, print it on log
-                    //LogManager.instance.SendMessageToLog(receivedData);
-                }
-                else
-                {
-                    //Debug.Log("Data Error: " + receivedData);
-                }
+                //    // when data is valid, print it on log
+                //    //LogManager.instance.SendMessageToLog(receivedData);
+                //}
+                //else
+                //{
+                //    //Debug.Log("Data Error: " + receivedData);
+                //}
             }
             catch (System.Exception)
             {
@@ -218,27 +218,62 @@ public class DisplayData : MonoBehaviour
         }
     }
 
-    // work on this later
-    //void ErrorCorrection(List<String> rawDataList, string rawDataString)
-    //{
-    //    ErrorType type;
+    void ErrorCorrection(string rawDataString)
+    {
+        Debug.Log("Error Correction");
+        ErrorType type;
 
-    //    Debug.Log("Data Error: " + rawDataString);
-    //    if(rawDataString == null)
-    //    {
-    //        if (startNoDataTimer == false)
-    //            startNoDataTimer = true;
+        // check no data conditions
+        if (rawDataString.Length <= 2 || rawDataString == "")
+        {
+            if (startNoDataTimer == false)
+                startNoDataTimer = true;
 
-    //        if (timerNoData >= periodNoDataLong)
-    //            type = ErrorType.NoDataLong;
-    //        else
-    //            type = ErrorType.NoDataShort;
+            if (timerNoData >= periodNoDataLong)
+                type = ErrorType.NoDataLong;
+            else
+                type = ErrorType.NoDataShort;
 
-    //        Debug.Log("Error: " + type.ToString());
-    //        return;
-    //    }
-        
-    //}
+            Debug.Log("Error: " + type.ToString());
+            return;
+        }
+
+        // check other conditions in ABA, BA, BA etc. format
+        string errorProfile = "";
+        for(int i=0; i< rawDataString.Length; i++)
+        {
+            if(rawDataString[i] == 'A' || rawDataString[i] == 'B')
+            {
+                errorProfile += rawDataString[i];
+            }
+        }
+        switch(errorProfile)
+        {
+            case "ABAB":
+                type = ErrorType.Multiple;
+                break;
+            case "ABA":
+                type = ErrorType.FullHalf;
+                break;
+            case "BAB":
+                type = ErrorType.HalfFull;
+                break;
+            case "B":
+                type = ErrorType.OnlyHalfB;
+                break;
+            case "A":
+                type = ErrorType.OnlyHalfA;
+                break;
+            case "BA":
+                type = ErrorType.HalfHalf;
+                break;
+            default:
+                type = ErrorType.UnDefined;
+                break;
+        }
+        Debug.Log("Error: " + type.ToString());
+
+    }
 }
 
 

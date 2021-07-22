@@ -30,9 +30,8 @@ public class RocketController : MonoBehaviour
 
     private float angleSetTime = 1f;
 
-    // work on it later
     // rotation only happens between specific angles, 2, 4, 6, 8 etc.
-    private float roundAngle = 2f;
+    private float roundAngle = 3f;
 
     [Header("Rocket Materials")]
     [SerializeField]
@@ -84,17 +83,9 @@ public class RocketController : MonoBehaviour
         rollCurrent = float.Parse(rollString) / 100f;
         pitchCurrent = float.Parse(pitchString) / 100f;
 
-        Debug.Log("BEFORE");
-        Debug.Log("Roll: " + rollCurrent);
-        Debug.Log("Pitch: " + pitchCurrent);
-
         // round to proper angles
         rollCurrent = RoundAngle(rollCurrent);
         pitchCurrent = RoundAngle(pitchCurrent);
-
-        Debug.Log("AFTER");
-        Debug.Log("Roll: " + rollCurrent);
-        Debug.Log("Pitch: " + pitchCurrent);
 
         rollDiff = rollCurrent - rollPrev;
         pitchDiff = pitchCurrent - pitchPrev;
