@@ -464,6 +464,53 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 174027936}
   m_CullTransparentMesh: 0
+--- !u!1 &176962034
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 176962036}
+  - component: {fileID: 176962035}
+  m_Layer: 0
+  m_Name: TileProvider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &176962035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 176962034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 756a01a914208439d8d2fc8dcd68b229, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cbtpOptions:
+    camera: {fileID: 1959372932}
+    visibleBuffer: 0
+    disposeBuffer: 0
+--- !u!4 &176962036
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 176962034}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 577752254516265174}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &195523904
 GameObject:
   m_ObjectHideFlags: 0
@@ -5689,13 +5736,13 @@ PrefabInstance:
     - target: {fileID: 689652538130074402, guid: 44d07a955be2ddc4a9edece733f95fe5,
         type: 3}
       propertyPath: _previewOptions.isPreviewEnabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 689652538130074402, guid: 44d07a955be2ddc4a9edece733f95fe5,
         type: 3}
       propertyPath: _tileProvider
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 176962035}
     - target: {fileID: 689652538130074402, guid: 44d07a955be2ddc4a9edece733f95fe5,
         type: 3}
       propertyPath: _options.locationOptions.latitudeLongitude
@@ -5713,6 +5760,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 44d07a955be2ddc4a9edece733f95fe5, type: 3}
+--- !u!4 &577752254516265174 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 582615653756521492, guid: 44d07a955be2ddc4a9edece733f95fe5,
+    type: 3}
+  m_PrefabInstance: {fileID: 577752254516265173}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &5429602819943418907 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1322585076379137203, guid: a13ceec5f9c04a34c909422d24b1eae8,

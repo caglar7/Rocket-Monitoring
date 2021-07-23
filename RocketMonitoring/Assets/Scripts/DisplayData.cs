@@ -68,9 +68,9 @@ public class DisplayData : MonoBehaviour
     // CHECK CONDITIONS
     private int dataSize = 11;
     private bool dataFirstObtained = false;
-    private bool firstHalfSecondValid = false;
-    private bool firstValidSecondHalf = false;
-    private bool dataUsable = false;
+    private bool isDataUsable = false;
+    private string errorStorageString = "";
+    private string usableDataString = "";
 
     // TIMER PARAMETERS
     // make sure this matches with arduino data transmission freq 
@@ -80,6 +80,11 @@ public class DisplayData : MonoBehaviour
     private float periodNoDataLong = 4f;
     private float timerNoData = 0f;
     private bool startNoDataTimer = false;
+
+
+    // TEST DELETE LATER
+    private int countValid = 0;
+    private int countNotValid = 0;
 
     void Start()
     {
@@ -125,7 +130,6 @@ public class DisplayData : MonoBehaviour
             {
                 // get data ----------------------------------------------------------------------
                 string receivedData = "";
-                string correctData = "";
 
                 try
                 {
@@ -145,82 +149,97 @@ public class DisplayData : MonoBehaviour
                 // valid check and extract proper data -----------------------------------------------
                 // data format -> A....B 
 
-                dataUsable = false;
-                firstValidSecondHalf = false;
-                firstHalfSecondValid = false;
+                isDataUsable = false;
 
                 if (datasRaw.Count == dataSize && datasRaw[0] == "A")
                 {
-                    dataUsable = true;
+                    isDataUsable = true;
                     datas = datasRaw.GetRange(1, dataSize - 2);
 
-                    // reset no data parameters since there is data
+                    // reset error parameters and strings
                     timerNoData = 0f;
                     startNoDataTimer = false;
+                    errorStorageString = "";
+                    usableDataString = "";
                 }
                 else
                 {
-                    // debug error type with received string, to check if profiler is working correct
-                    ErrorCorrection(receivedData);
+                    // profile and handle errors
+                    Debug.Log("------Error Data: " + receivedData);
+                    ErrorType errorType = ProfileError(receivedData);
+                    Debug.Log("Error Type: " + errorType.ToString());
+
+                    // write storage and usable data
+                    HandleError(errorType, receivedData);
+
+                    // split usable data and check
+                    datas = usableDataString.Split(':').ToList();
+                    if(datas.Count == dataSize && datas[0] == "A")
+                    {
+                        // remove A and B from datas list
+                        datas.RemoveAt(datas.Count - 1);
+                        datas.RemoveAt(0);
+                        isDataUsable = true;
+                        Debug.Log("Error is used properly");
+                    }
+                    else
+                    {
+                        countNotValid++;
+                        Debug.Log("Not Valid: " + countNotValid);
+                        //Debug.Log("Usable Data: " + usableDataString);
+                    }
                 }
 
                 // -----------------------------------------------------------------------------------
 
-                // if data is valid, do something
-                //if (dataUsable)
-                //{
-                //    if (dataFirstObtained == false)
-                //    {
-                //        dataFirstObtained = true;
-                //        LogManager.instance.SendMessageToLog("First Data is obtained");
-                //    }
+                //if data is valid, do something -------------------------------------------------------
+                if (isDataUsable)
+                {
+                    if (dataFirstObtained == false)
+                    {
+                        dataFirstObtained = true;
+                        LogManager.instance.SendMessageToLog("First Data is obtained");
+                    }
 
-                //    // altitude display, convert float then format to proper string
-                //    float altitudeData = float.Parse(datas[2]) / 100f;
-                //    textAltitude.text = altitudeData.ToString();
+                    // altitude display, convert float then format to proper string
+                    float altitudeData = float.Parse(datas[2]) / 100f;
+                    textAltitude.text = altitudeData.ToString();
 
-                //    // velocity unit conversion and set on speedometer, 3
-                //    float speedData_meters = float.Parse(datas[3]) / 100f;
-                //    speedometer.SetSpeed(speedData_meters);
+                    // velocity unit conversion and set on speedometer, 3
+                    float speedData_meters = float.Parse(datas[3]) / 100f;
+                    speedometer.SetSpeed(speedData_meters);
 
-                //    // assign rotation directions string on the RocketController.cs, 4
-                //    string[] RPstrings = datas[4].Split(',');
-                //    RocketController.instance.RotateRocket(RPstrings[0], RPstrings[1]);
+                    // assign rotation directions string on the RocketController.cs, 4
+                    string[] RPstrings = datas[4].Split(',');
+                    RocketController.instance.RotateRocket(RPstrings[0], RPstrings[1]);
 
-                //    // parachute displays, 5 and 6
-                //    // 1st
-                //    if (datas[5] == "1")
-                //        firstParachute.color = greenColor;
-                //    else if (datas[5] == "0")
-                //        firstParachute.color = defaultColor;
-                //    // 2nd
-                //    if (datas[6] == "1")
-                //        secondParachute.color = greenColor;
-                //    else if (datas[6] == "0")
-                //        secondParachute.color = defaultColor;
+                    // 1st parachute
+                    if (datas[5] == "1")
+                        firstParachute.color = greenColor;
+                    else if (datas[5] == "0")
+                        firstParachute.color = defaultColor;
+                    // 2nd parachute
+                    if (datas[6] == "1")
+                        secondParachute.color = greenColor;
+                    else if (datas[6] == "0")
+                        secondParachute.color = defaultColor;
 
-                //    // pass lat long to the map script, base 7 8, rocket 0 1
-                //    SpawnOnMapCustom.instance.SetBasePosition(datas[7] + "," + datas[8]);
-                //    SpawnOnMapCustom.instance.SetRocketPosition(datas[0] + "," + datas[1]);
-
-                //    // when data is valid, print it on log
-                //    //LogManager.instance.SendMessageToLog(receivedData);
-                //}
-                //else
-                //{
-                //    //Debug.Log("Data Error: " + receivedData);
-                //}
+                    // pass lat long to the map script, base 7 8, rocket 0 1
+                    SpawnOnMapCustom.instance.SetBasePosition(datas[7] + "," + datas[8]);
+                    SpawnOnMapCustom.instance.SetRocketPosition(datas[0] + "," + datas[1]);
+                }
+                // -----------------------------------------------------------------------------------------
             }
-            catch (System.Exception)
+            catch (Exception e)
             {
-                
+                LogManager.instance.SendMessageToLog(e.Message);
             }
         }
     }
 
-    void ErrorCorrection(string rawDataString)
+    // return type of error there is
+    ErrorType ProfileError(string rawDataString)
     {
-        Debug.Log("Error Correction");
         ErrorType type;
 
         // check no data conditions
@@ -234,8 +253,7 @@ public class DisplayData : MonoBehaviour
             else
                 type = ErrorType.NoDataShort;
 
-            Debug.Log("Error: " + type.ToString());
-            return;
+            return type;
         }
 
         // check other conditions in ABA, BA, BA etc. format
@@ -247,15 +265,22 @@ public class DisplayData : MonoBehaviour
                 errorProfile += rawDataString[i];
             }
         }
-        switch(errorProfile)
+        if(errorProfile.Length >= 4)
+            errorProfile = errorProfile.Substring(errorProfile.Length - 4);
+
+
+        // consider BABA also, might occur again, test a lot
+        switch (errorProfile)
         {
             case "ABAB":
                 type = ErrorType.Multiple;
                 break;
             case "ABA":
+            case "BABA":
                 type = ErrorType.FullHalf;
                 break;
             case "BAB":
+            case "BBAB":
                 type = ErrorType.HalfFull;
                 break;
             case "B":
@@ -271,8 +296,62 @@ public class DisplayData : MonoBehaviour
                 type = ErrorType.UnDefined;
                 break;
         }
-        Debug.Log("Error: " + type.ToString());
+        return type;
+    }
 
+    // make use of errors to extract data
+    private void HandleError(ErrorType type, string rawDataString)
+    {
+        usableDataString = "";
+        int indexA1 = rawDataString.IndexOf('A');
+        int indexA2 = rawDataString.LastIndexOf('A');
+        int indexB1 = rawDataString.IndexOf('B');
+        int indexB2 = rawDataString.LastIndexOf('B');
+
+        Debug.Log("Error Storage: " + errorStorageString);
+
+        switch (type)
+        {
+            // when there is no data, reset strings
+            case ErrorType.NoDataShort:
+            case ErrorType.NoDataLong:
+                errorStorageString = "";
+                break;
+
+            // take last valid string
+            case ErrorType.Multiple:
+            case ErrorType.HalfFull:
+                errorStorageString = "";
+                usableDataString += rawDataString.Substring(indexA2);
+                break;
+
+            // take first valid string, put remaining to storage
+            case ErrorType.FullHalf:
+                errorStorageString = "";
+                usableDataString += rawDataString.Substring(indexA1, indexB1 - indexA1 + 1);
+                errorStorageString += rawDataString.Substring(indexA2);
+                break;
+
+            // only halfA string, straight to the storage
+            case ErrorType.OnlyHalfA:
+                errorStorageString = "";
+                errorStorageString += rawDataString;
+                break;
+
+            // add half B to the half A on storage, making a full valid string, hope so...
+            case ErrorType.OnlyHalfB:
+                usableDataString += errorStorageString + rawDataString;
+                errorStorageString = "";
+                break;
+
+            case ErrorType.HalfHalf:
+                usableDataString += errorStorageString + rawDataString.Substring(0, indexB1+1);
+                errorStorageString = "";
+                errorStorageString += rawDataString.Substring(indexA2);
+                break;
+        }
+
+        Debug.Log("Usable String : " + usableDataString);
     }
 }
 
