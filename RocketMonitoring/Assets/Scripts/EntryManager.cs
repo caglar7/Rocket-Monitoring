@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using System.IO.Ports;
 using System;
+using System.Linq;
 
 public class EntryManager : MonoBehaviour
 {
@@ -32,10 +33,16 @@ public class EntryManager : MonoBehaviour
     bool checkCOMPort;
     bool checkDataPeriod;
 
+    // entry parameters
+    List<string> ports;
+
     void Start()
     {
+        // get available ports
+        ports = SerialPort.GetPortNames().ToList();
+
         // set initial values, for quick tests
-        dropDown_Ports.value = 3;
+        dropDown_Ports.AddOptions(ports);
         dropDown_BaudRates.value = 9;
         inputField_Period.text = "500";
     }
@@ -48,7 +55,6 @@ public class EntryManager : MonoBehaviour
         checkCOMPort = false;
         int portIndex = dropDown_Ports.value;
         string portSelected = dropDown_Ports.options[portIndex].text;
-        string[] ports = SerialPort.GetPortNames();
         foreach (string port in ports)
         {
             if (portSelected == port)

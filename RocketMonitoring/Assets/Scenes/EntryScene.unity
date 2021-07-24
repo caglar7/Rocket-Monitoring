@@ -1923,7 +1923,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: COM1
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c76dab80737704945aaea5957117b044, type: 2}
   m_sharedMaterial: {fileID: -3972367151201698622, guid: c76dab80737704945aaea5957117b044,
@@ -1993,13 +1993,13 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 632212737}
-    characterCount: 4
+    characterCount: 0
     spriteCount: 0
     spaceCount: 0
-    wordCount: 1
+    wordCount: 0
     linkCount: 0
-    lineCount: 1
-    pageCount: 1
+    lineCount: 0
+    pageCount: 0
     materialCount: 1
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
@@ -3327,37 +3327,7 @@ MonoBehaviour:
   m_ItemImage: {fileID: 0}
   m_Value: 0
   m_Options:
-    m_Options:
-    - m_Text: COM1
-      m_Image: {fileID: 0}
-    - m_Text: COM2
-      m_Image: {fileID: 0}
-    - m_Text: COM3
-      m_Image: {fileID: 0}
-    - m_Text: COM4
-      m_Image: {fileID: 0}
-    - m_Text: COM5
-      m_Image: {fileID: 0}
-    - m_Text: COM6
-      m_Image: {fileID: 0}
-    - m_Text: COM7
-      m_Image: {fileID: 0}
-    - m_Text: COM8
-      m_Image: {fileID: 0}
-    - m_Text: COM9
-      m_Image: {fileID: 0}
-    - m_Text: COM10
-      m_Image: {fileID: 0}
-    - m_Text: COM11
-      m_Image: {fileID: 0}
-    - m_Text: COM12
-      m_Image: {fileID: 0}
-    - m_Text: COM13
-      m_Image: {fileID: 0}
-    - m_Text: COM14
-      m_Image: {fileID: 0}
-    - m_Text: COM15
-      m_Image: {fileID: 0}
+    m_Options: []
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []

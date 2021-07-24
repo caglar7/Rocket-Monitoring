@@ -81,7 +81,6 @@ public class DisplayData : MonoBehaviour
     private float timerNoData = 0f;
     private bool startNoDataTimer = false;
 
-
     // TEST DELETE LATER
     private int countValid = 0;
     private int countNotValid = 0;
@@ -90,20 +89,16 @@ public class DisplayData : MonoBehaviour
     {
         // assign data from EntryManager
         readPeriod = EntryManager.dataObtainPeriod;
-        StopBits stopBits = StopBits.One;
-        // set 0 8 stopbits later to test again
-        sp = new SerialPort(EntryManager.dataCOM, EntryManager.dataBaudRate, 0, 8, stopBits);
-        sp.ReadTimeout = 100;
-        sp.Open();
-
         readPeriodRemaining = readPeriod;
+
+        InitSerialPort();
     }
 
     void Update()
     {
         // TIMERS ---------------------------------------------------------------------------------
         // start measuring time when there is no data
-        if(startNoDataTimer == true)
+        if (startNoDataTimer == true)
         {
             timerNoData += Time.deltaTime;
         }
@@ -142,7 +137,6 @@ public class DisplayData : MonoBehaviour
                 }
                 List<string> datasRaw = receivedData.Split(':').ToList();
                 List<string> datas = new List<string>();
-
                 // --------------------------------------------------------------------------------
 
 
@@ -174,7 +168,7 @@ public class DisplayData : MonoBehaviour
 
                     // split usable data and check
                     datas = usableDataString.Split(':').ToList();
-                    if(datas.Count == dataSize && datas[0] == "A")
+                    if (datas.Count == dataSize && datas[0] == "A")
                     {
                         // remove A and B from datas list
                         datas.RemoveAt(datas.Count - 1);
@@ -229,6 +223,7 @@ public class DisplayData : MonoBehaviour
                     SpawnOnMapCustom.instance.SetRocketPosition(datas[0] + "," + datas[1]);
                 }
                 // -----------------------------------------------------------------------------------------
+
             }
             catch (Exception e)
             {
@@ -312,7 +307,7 @@ public class DisplayData : MonoBehaviour
 
         switch (type)
         {
-            // when there is no data, reset strings
+            // when there is no data, reset strings and init serial port
             case ErrorType.NoDataShort:
             case ErrorType.NoDataLong:
                 errorStorageString = "";
@@ -352,6 +347,14 @@ public class DisplayData : MonoBehaviour
         }
 
         Debug.Log("Usable String : " + usableDataString);
+    }
+
+    void InitSerialPort()
+    {
+        StopBits stopBits = StopBits.One;
+        sp = new SerialPort(EntryManager.dataCOM, EntryManager.dataBaudRate, 0, 8, stopBits);
+        sp.ReadTimeout = 100;
+        sp.Open();
     }
 }
 
