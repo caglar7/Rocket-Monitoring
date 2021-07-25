@@ -37,6 +37,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 	Vector3 _cameraDiff;
 	bool _setCameraToBase = false;
 	bool _setCameraTarget = false;
+	public float currentScale = 1f;
 
 	[Header("Marker Parameters")]
 	[SerializeField] float _yPosition = 10f;
@@ -69,7 +70,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 		_locationSetPeriod = EntryManager.dataObtainPeriod;
 
 		// set proper scale for markers on map, 
-		float currentScale = _mapCamera.transform.position.y / _baseScaleFactor;
+		currentScale = _mapCamera.transform.position.y / _baseScaleFactor;
 		_spawnScale = currentScale * _markerScale;
 
 		_locations = new Vector2d[_locationStrings.Length];
@@ -122,9 +123,8 @@ public class SpawnOnMapCustom : MonoBehaviour
 		}
 
 		// current camera scale
-		float currentScale = _mapCamera.transform.position.y / _baseScaleFactor;
+		currentScale = _mapCamera.transform.position.y / _baseScaleFactor;
 		_spawnScale = currentScale * _markerScale;
-
 
 		// MOVE CAMERA WITH MOUSE DRAG ###############################################################
 		if (DraggingMap.isDragging)
@@ -170,6 +170,8 @@ public class SpawnOnMapCustom : MonoBehaviour
 			spawnedObject.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 		}
 		//	#########################################################################################################
+
+
 	}
 
 	// assign random lat long periodically
@@ -197,7 +199,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 		_diffValues[1] = nextRocketPosition - _locations[1];
 	}
 
-	// create AvionicBay location set method later
+	// create PayLoad location set method later
 	// ...
 }
 
