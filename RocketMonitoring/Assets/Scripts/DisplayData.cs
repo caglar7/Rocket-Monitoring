@@ -159,9 +159,7 @@ public class DisplayData : MonoBehaviour
                 else
                 {
                     // profile and handle errors
-                    Debug.Log("------Error Data: " + receivedData);
                     ErrorType errorType = ProfileError(receivedData);
-                    Debug.Log("Error Type: " + errorType.ToString());
 
                     // write storage and usable data
                     HandleError(errorType, receivedData);
