@@ -48,11 +48,14 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
     private float dir = 1f;
 
     // missing pointer conditions for rocket, base and payload
-    // set outside
+    // set pointeron check
     public static bool basePointerOn = false;
     public static bool rocketPointerOn = false;
     public static bool payloadPointerOn = false;
-    // set here
+    // set direction and scale outside
+    public static Vector2 baseOutsideDir, rocketOutsideDir, payloadOutsideDir;
+    public static float baseOutsideScale, rocketOutsideScale, payloadOutsideScale;
+    // active condition, on this class
     private bool basePointerActive = false;
     private bool rocketPointerActive = false;
     private bool payloadPointerActive = false;
@@ -111,11 +114,12 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
         // Move rocket missing pointer
         if (rocketPointerOn && rocketPointerActive)
         {
-            rocketPointer.GetComponent<MissingPointerControl>().MovePointer(cornerRTList, new Vector2(1f, 0f), timer);
+            rocketPointer.GetComponent<MissingPointerControl>().MovePointer(cornerRTList, rocketOutsideDir, rocketOutsideScale);
         }
 
-        Debug.Log("rocketPointerOn: " + rocketPointerOn);
-        Debug.Log("rocketActive: " + rocketPointerActive);
+        // test later
+        //Debug.Log("rocketPointerOn: " + rocketPointerOn);
+        //Debug.Log("rocketActive: " + rocketPointerActive);
     }
 
 

@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
+
+// TEST THIS ON MANY DIFFERENT LOCATIONS
+// CITIES DISTRICTS ETC.
+
 public class MissingPointerControl : MonoBehaviour
 {
     RectTransform mainRT;
@@ -36,9 +40,9 @@ public class MissingPointerControl : MonoBehaviour
     public void MovePointer(List<RectTransform> rtList, Vector2 direction, float scale)
     {
         // check gameObject rect transform at first
-        if (mainRT == null)
+        if (mainRT == null || direction == Vector2.zero)
         {
-            Debug.Log("mainRT in MissingPointerControl() is null");
+            Debug.Log("mainRT in MissingPointerControl() is null, or direction is zero");
             return;
         }
 

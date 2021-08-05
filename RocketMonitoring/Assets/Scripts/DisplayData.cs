@@ -15,16 +15,18 @@ using System.Linq;
 // DATA ORDER AND INDEXES, IN STRING ARRAY, A AND B ARE FOR VALID CHECK
 /*
     A       0
-    LAT     1
-    LONG    2 
-    A       3
-    V       4
-    AN      5
-    FRT     6
-    SND     7
-    LAT_B   8
-    LONG_B  9
-    B       10
+    ID      1
+    TIME    2
+    LAT     3
+    LONG    4 
+    A       5
+    V       6
+    AN      7
+    FRT     8
+    SND     9
+    LAT_B   10
+    LONG_B  11
+    B       12
 */
 
 public enum ErrorType
@@ -66,7 +68,7 @@ public class DisplayData : MonoBehaviour
     Color greenColor;
 
     // CHECK CONDITIONS
-    private int dataSize = 11;
+    private int dataSize = 13;
     private bool dataFirstObtained = false;
     private bool isDataUsable = false;
     private string errorStorageString = "";
@@ -194,31 +196,31 @@ public class DisplayData : MonoBehaviour
                     }
 
                     // altitude display, convert float then format to proper string
-                    float altitudeData = float.Parse(datas[2]) / 100f;
+                    float altitudeData = float.Parse(datas[4]) / 100f;
                     textAltitude.text = altitudeData.ToString();
 
                     // velocity unit conversion and set on speedometer, 3
-                    float speedData_meters = float.Parse(datas[3]) / 100f;
+                    float speedData_meters = float.Parse(datas[5]) / 100f;
                     speedometer.SetSpeed(speedData_meters);
 
                     // assign rotation directions string on the RocketController.cs, 4
-                    string[] RPstrings = datas[4].Split(',');
+                    string[] RPstrings = datas[6].Split(',');
                     RocketController.instance.RotateRocket(RPstrings[0], RPstrings[1]);
 
                     // 1st parachute
-                    if (datas[5] == "1")
+                    if (datas[7] == "1")
                         firstParachute.color = greenColor;
-                    else if (datas[5] == "0")
+                    else if (datas[7] == "0")
                         firstParachute.color = defaultColor;
                     // 2nd parachute
-                    if (datas[6] == "1")
+                    if (datas[8] == "1")
                         secondParachute.color = greenColor;
-                    else if (datas[6] == "0")
+                    else if (datas[8] == "0")
                         secondParachute.color = defaultColor;
 
                     // pass lat long to the map script, base 7 8, rocket 0 1
-                    SpawnOnMapCustom.instance.SetBasePosition(datas[7] + "," + datas[8]);
-                    SpawnOnMapCustom.instance.SetRocketPosition(datas[0] + "," + datas[1]);
+                    SpawnOnMapCustom.instance.SetBasePosition(datas[9] + "," + datas[10]);
+                    SpawnOnMapCustom.instance.SetRocketPosition(datas[2] + "," + datas[3]);
                 }
                 // -----------------------------------------------------------------------------------------
 

@@ -56,6 +56,19 @@ public class SpawnOnMapCustom : MonoBehaviour
 	[Header("Scroll Wheel Sensitivity")]
 	[SerializeField] float sensitivityValue = 10f;
 
+	// cam boundary offset values, initial value at scale 1
+	// world position, diff values from camera center
+	float camBoundLeft_Base = -31.4f;
+	float camBoundRight_Base = 31.2f;
+	float camBoundDown_Base = -28.3f;
+	float camBoundUp_Base = 27.8f;
+	float scaleOffSetX_Base = 6f;
+	float scaleOffSetY_Base = 3f;
+	float camBoundLeft_Current, camBoundRight_Current;
+	float camBoundDown_Current, camBoundUp_Current;
+	float scaleOffSetX_Current;
+	float scaleOffSetY_Current;
+
 	void Awake()
 	{
 		if (instance == null)
@@ -88,11 +101,19 @@ public class SpawnOnMapCustom : MonoBehaviour
 			instance.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 			_spawnedObjects.Add(instance);
 		}
+
+		// Set camera bounds for missing pointers
+		camBoundLeft_Current = camBoundLeft_Base;
+		camBoundRight_Current = camBoundRight_Base;
+		camBoundDown_Current = camBoundDown_Base;
+		camBoundUp_Current = camBoundUp_Base;
+		scaleOffSetX_Current = scaleOffSetX_Base;
+		scaleOffSetY_Current = scaleOffSetY_Base;
 	}
 
 	private void Update()
 	{
-		// SET INITIAL CAMERA POSITION ONCE
+		// SET INITIAL CAMERA POSITION ONCE -------------------------------------------------------------
 		if(_setCameraToBase == false && _setCameraTarget == true)
         {
 			_mapCamera.transform.position += (_cameraDiff * Time.deltaTime / _initialCameraSetTime);
@@ -107,8 +128,9 @@ public class SpawnOnMapCustom : MonoBehaviour
 				LogManager.instance.SendMessageToLog("Map is loaded");
 			}
         }
+		// ------------------------------------------------------------------------------------------------
 
-		// get scroll wheel data and assign to map camera y
+		// get scroll wheel data and assign to map camera y -----------------------------------------------
 		float scrollWheel = Input.GetAxis("Mouse ScrollWheel");
 		if(scrollWheel < 0f && DraggingMap.isMouseInRegion)
         {
@@ -121,12 +143,13 @@ public class SpawnOnMapCustom : MonoBehaviour
 				_mapCamera.transform.position -= new Vector3(0f, sensitivityValue, 0f);
 
 		}
+		// ------------------------------------------------------------------------------------------------
 
 		// current camera scale
 		currentScale = _mapCamera.transform.position.y / _baseScaleFactor;
 		_spawnScale = currentScale * _markerScale;
 
-		// MOVE CAMERA WITH MOUSE DRAG ###############################################################
+		// MOVE CAMERA WITH MOUSE DRAG ---------------------------------------------------------------------
 		if (DraggingMap.isDragging)
         {
 			_prevDragX = _currentDragX;
@@ -148,28 +171,49 @@ public class SpawnOnMapCustom : MonoBehaviour
 			_prevDragZ = 0f;
 			_currentDragZ = 0f;
         }
-		// ###################################################################################################
+		// -------------------------------------------------------------------------------------------------
+
+		// update cam boundaries, left, right, down and up, offset values
+		camBoundLeft_Current = camBoundLeft_Base * currentScale;
+		camBoundRight_Current = camBoundRight_Base * currentScale;
+		camBoundDown_Current = camBoundDown_Base * currentScale;
+		camBoundUp_Current = camBoundUp_Base * currentScale;
+		scaleOffSetX_Current = scaleOffSetX_Base * currentScale;
+		scaleOffSetY_Current = scaleOffSetY_Base * currentScale;
 
 		// location adding doesn't check if it reaches the target point, check it out
 		// BASE POSITION SMOOTH UPDATE
 		_locations[0] += (_diffValues[0] * Time.deltaTime / _locationSetPeriod);
-
+		
 		// ROCKET POSITION SMOOTH UPDATE
 		_locations[1] += (_diffValues[1] * Time.deltaTime / _locationSetPeriod);
+		
 
-
-		//	SET MARKER LOCATIONS #################################################################################
+		//	SET MARKER LOCATIONS -------------------------------------------------------------------------------
 		int count = _spawnedObjects.Count;
 		for (int i = 0; i < count; i++)
 		{
 			var spawnedObject = _spawnedObjects[i];
 			var location = _locations[i];
 
-			Vector3 rawPosition = _map.GeoToWorldPosition(_locations[i], true);
+			Vector3 rawPosition = _map.GeoToWorldPosition(location, true);
 			spawnedObject.transform.localPosition = new Vector3(rawPosition.x, _yPosition, rawPosition.z);
 			spawnedObject.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
+
+			// check if position is outside of minimap
+			if(i==1)
+            {
+				Vector3 rocketOffset = spawnedObject.transform.position - _mapCamera.transform.position;
+				Vector2 dir = OverBoundDirection(rocketOffset);
+				DraggingMap.rocketPointerOn = (dir != Vector2.zero) ? true : false;
+				if(DraggingMap.rocketPointerOn)
+                {
+					DraggingMap.rocketOutsideDir = dir;
+					DraggingMap.rocketOutsideScale = PointerScale(rocketOffset, dir);
+				}
+			}
 		}
-		//	#########################################################################################################
+		//	---------------------------------------------------------------------------------------------------------
 
 
 	}
@@ -181,12 +225,14 @@ public class SpawnOnMapCustom : MonoBehaviour
 		Vector2d nextBasePosition = Conversions.StringToLatLon(locString);
 		_diffValues[0] = nextBasePosition - _locations[0];
 
+		// take base position in world position
+		Vector3 baseWorldPos = _map.GeoToWorldPosition(nextBasePosition, true);
+
 		// set camera target and initial positions
-		if(_setCameraTarget == false)
+		if (_setCameraTarget == false)
         {
 			_setCameraTarget = true;
-			Vector3 tempWorldPos = _map.GeoToWorldPosition(nextBasePosition, true);
-			_cameraTargetPos = new Vector3(tempWorldPos.x, _baseScaleFactor, tempWorldPos.z);
+			_cameraTargetPos = new Vector3(baseWorldPos.x, _baseScaleFactor, baseWorldPos.z);
 			Vector3 camInit = new Vector3(_mapCamera.transform.position.x, _baseScaleFactor, _mapCamera.transform.position.z);
 			_cameraDiff = _cameraTargetPos - camInit;
         }
@@ -197,10 +243,70 @@ public class SpawnOnMapCustom : MonoBehaviour
 		// assign location difference
 		Vector2d nextRocketPosition = Conversions.StringToLatLon(locString);
 		_diffValues[1] = nextRocketPosition - _locations[1];
+
+		// take rocket position in world position
+		Vector3 rocketWorldPos = _map.GeoToWorldPosition(nextRocketPosition, true);
 	}
 
 	// create PayLoad location set method later
 	// ...
+
+
+	// output Vector2 (x, y)
+	private Vector2 OverBoundDirection(Vector3 checkPosition)
+    {
+		float xDir = 0f;
+		float yDir = 0f;
+		xDir = (checkPosition.x <= camBoundLeft_Current) ? -1f : xDir;
+		xDir = (checkPosition.x >= camBoundRight_Current) ? 1f : xDir;
+		yDir = (checkPosition.z >= camBoundUp_Current) ? 1f : yDir;
+		yDir = (checkPosition.z <= camBoundDown_Current) ? -1f : yDir;
+		return new Vector2(xDir, yDir);
+    }
+
+	private float PointerScale(Vector3 pointerPos, Vector2 pointerDir)
+    {
+		float bound1 = 0f;
+		float bound2 = 0f;
+		float scale = 0f;
+		string state = "";
+
+		if ( (Mathf.Abs(pointerDir.x) + Mathf.Abs(pointerDir.y)) == 1f)
+        {
+			bound1 = (pointerDir.x == 0f) ? camBoundLeft_Current : camBoundDown_Current;
+			bound2 = (pointerDir.x == 0f) ? camBoundRight_Current : camBoundUp_Current;
+
+			if (pointerDir.x == 0f)
+            {
+				state = "horizontal";
+				bound1 += scaleOffSetX_Current;
+				bound2 -= scaleOffSetX_Current;
+			}
+			else
+            {
+				state = "vertical";
+				bound1 += scaleOffSetY_Current;
+				bound2 -= scaleOffSetY_Current;
+			}
+		}
+
+		float range = bound2 - bound1;
+		if(state == "horizontal")
+        {
+			float pointX = Mathf.Clamp(pointerPos.x, bound1, bound2);
+			pointX = pointX - bound1;
+			scale = Mathf.Abs(pointX / range);
+        }
+		else if(state == "vertical")
+        {
+			float pointZ = Mathf.Clamp(pointerPos.z, bound1, bound2);
+			pointZ = pointZ - bound1;
+			scale = Mathf.Abs(pointZ / range);
+        }
+
+		scale = Mathf.Clamp(scale, 0f, 1f);
+		return scale;
+	}
 }
 
 
