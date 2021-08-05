@@ -30,6 +30,8 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
     [SerializeField]
     private GameObject prefabRocketPointer;   // it will be base, rocket and later payload
     [SerializeField]
+    private GameObject prefabBasePointer;
+    [SerializeField]
     private RectTransform upLeftRT;
     [SerializeField]
     private RectTransform upRightRT;
@@ -40,12 +42,7 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
     [SerializeField]
     private List<RectTransform> cornerRTList;
     private GameObject rocketPointer;
-
-    // test timers
-    private float timerPeriod = 1f;
-    private float timer = 0f;
-    private float speed = 1f;
-    private float dir = 1f;
+    private GameObject basePointer;
 
     // missing pointer conditions for rocket, base and payload
     // set pointeron check
@@ -73,20 +70,11 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
 
         // instantiate and deactivate pointer UI objects
         rocketPointer = Instantiate(prefabRocketPointer, gameObject.transform);
+        basePointer = Instantiate(prefabBasePointer, gameObject.transform);
     }
 
     void Update()
     {
-        timer += (dir * Time.deltaTime * speed);
-        if(timer > timerPeriod || timer < 0f)
-        {
-            timer = (dir > 0f) ? 1f : 0f;
-            dir = -dir;
-
-            // for test delete later
-            rocketPointerOn = !rocketPointerOn;
-        }
-
         // dragging code
         if(isDragging)
         {
@@ -110,16 +98,17 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
 
         // Activate or Deactivate missing pointers, base, rocket and payload
         ShowHidePointers(MissingPointerType.RocketPointer);
+        ShowHidePointers(MissingPointerType.BasePointer);
 
-        // Move rocket missing pointer
+        // Move missing pointers on minimap
+        if(basePointerOn && basePointerActive)
+        {
+            basePointer.GetComponent<MissingPointerControl>().MovePointer(cornerRTList, baseOutsideDir, baseOutsideScale);
+        }
         if (rocketPointerOn && rocketPointerActive)
         {
             rocketPointer.GetComponent<MissingPointerControl>().MovePointer(cornerRTList, rocketOutsideDir, rocketOutsideScale);
         }
-
-        // test later
-        //Debug.Log("rocketPointerOn: " + rocketPointerOn);
-        //Debug.Log("rocketActive: " + rocketPointerActive);
     }
 
 
@@ -175,15 +164,35 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
     // this currently does only rocket pointer
     private void ShowHidePointers(MissingPointerType type)
     {
-        if(rocketPointerOn && rocketPointerActive == false)
+        switch(type)
         {
-            rocketPointerActive = true;
-            rocketPointer.SetActive(true);
-        }
-        else if(rocketPointerOn == false && rocketPointerActive)
-        {
-            rocketPointerActive = false;
-            rocketPointer.SetActive(false);
+            case MissingPointerType.RocketPointer:
+
+                if (rocketPointerOn && rocketPointerActive == false)
+                {
+                    rocketPointerActive = true;
+                    rocketPointer.SetActive(true);
+                }
+                else if (rocketPointerOn == false && rocketPointerActive)
+                {
+                    rocketPointerActive = false;
+                    rocketPointer.SetActive(false);
+                }
+                break;
+
+            case MissingPointerType.BasePointer:
+
+                if (basePointerOn && basePointerActive == false)
+                {
+                    basePointerActive = true;
+                    basePointer.SetActive(true);
+                }
+                else if (basePointerOn == false && basePointerActive)
+                {
+                    basePointerActive = false;
+                    basePointer.SetActive(false);
+                }
+                break;
         }
     }
 }

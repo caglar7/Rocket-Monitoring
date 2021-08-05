@@ -201,6 +201,19 @@ public class SpawnOnMapCustom : MonoBehaviour
 			spawnedObject.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 
 			// check if position is outside of minimap
+			// base
+			if(i==0)
+            {
+				Vector3 baseOffset = spawnedObject.transform.position - _mapCamera.transform.position;
+				Vector2 dir = OverBoundDirection(baseOffset);
+				DraggingMap.basePointerOn = (dir != Vector2.zero) ? true : false;
+				if (DraggingMap.basePointerOn)
+				{
+					DraggingMap.baseOutsideDir = dir;
+					DraggingMap.baseOutsideScale = PointerScale(baseOffset, dir);
+				}
+			}
+			// rocket
 			if(i==1)
             {
 				Vector3 rocketOffset = spawnedObject.transform.position - _mapCamera.transform.position;

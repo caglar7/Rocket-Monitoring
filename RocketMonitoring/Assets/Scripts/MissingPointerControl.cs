@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Linq;
+using TMPro;
 
 
 // TEST THIS ON MANY DIFFERENT LOCATIONS
@@ -16,10 +18,7 @@ public class MissingPointerControl : MonoBehaviour
 
     private float arrowWidth = 16.84f;
     private float arrowHeight = 27.84f;
-
-    // test with timer
-    float timerPeriod = 2f;
-    float timer = 0f;
+    private float diagonalOffset = 10f;
 
     void Start()
     {
@@ -75,9 +74,16 @@ public class MissingPointerControl : MonoBehaviour
                 ref1 = rtList[2];
                 ref2 = rtList[3];
                 break;
-            default:
+            case 45f:
+            case 135f:
                 ref1 = rtList[0];
                 ref2 = rtList[1];
+                scale = (angle == 45f) ? 1f : 0f;
+                break;
+            default:
+                ref1 = rtList[2];
+                ref2 = rtList[3];
+                scale = (angle == 225f) ? 0f : 1f;
                 break;
         }
 
@@ -95,23 +101,34 @@ public class MissingPointerControl : MonoBehaviour
         float anchorX_Text = 0f;
         float anchorY_Text = 0f;
 
-        if (angle == 180f || angle == 0f)
+        switch(angle)
         {
-            anchorX_Arrow = (angle == 0f) ? 1f : 0f;
-            anchorY_Arrow = 0.5f;
-
-            anchorX_Text = (angle == 0f) ? 0f : 1f;
-            anchorY_Text = 0.5f;
+            case 180f:
+            case 0f:
+                anchorX_Arrow = (angle == 0f) ? 1f : 0f;
+                anchorY_Arrow = 0.5f;
+                anchorX_Text = (angle == 0f) ? 0f : 1f;
+                anchorY_Text = 0.5f;
+                break;
+            case 90f:
+            case 270f:
+                anchorX_Arrow = 0.5f;
+                anchorY_Arrow = (angle == 90f) ? 1f : 0f;
+                anchorX_Text = 0.5f;
+                anchorY_Text = (angle == 90f) ? 0f : 1f;
+                break;
+            case 45f:
+            case 135f:
+            case 225f:
+            case 315f:
+                anchorX_Arrow = (angle == 45f || angle == 315f) ? 1f : 0f;
+                anchorY_Arrow = (angle == 45f || angle == 135f) ? 1f : 0f;
+                anchorX_Text = 0.5f;
+                anchorY_Text = 0.5f;
+                mainRT.anchoredPosition -= (direction * diagonalOffset);
+                break;
         }
-        else
-        {
-            anchorX_Arrow = 0.5f;
-            anchorY_Arrow = (angle == 90f) ? 1f : 0f;
 
-            anchorX_Text = 0.5f;
-            anchorY_Text = (angle == 90f) ? 0f : 1f;
-
-        }
         arrowRT.anchorMin = new Vector2(anchorX_Arrow, anchorY_Arrow);
         arrowRT.anchorMax = new Vector2(anchorX_Arrow, anchorY_Arrow);
         textRT.pivot = new Vector2(anchorX_Text, anchorY_Text);
@@ -120,4 +137,5 @@ public class MissingPointerControl : MonoBehaviour
         textRT.anchoredPosition = new Vector2(0f, 0f);
         // ----------------------------------------------------------------------------------
     }
+
 }

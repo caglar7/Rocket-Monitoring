@@ -1785,6 +1785,8 @@ MonoBehaviour:
   textMetersRange: {fileID: 1918984914}
   prefabRocketPointer: {fileID: 5775829654918202001, guid: 89303f768a1303d45904038a1a4b46b9,
     type: 3}
+  prefabBasePointer: {fileID: 5775829654918202001, guid: 2636096016160c7478b78546b4f93b44,
+    type: 3}
   upLeftRT: {fileID: 1625561216}
   upRightRT: {fileID: 522712525}
   downLeftRT: {fileID: 390070459}
