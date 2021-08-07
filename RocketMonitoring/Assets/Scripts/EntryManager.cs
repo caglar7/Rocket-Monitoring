@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using TMPro;
 using System.IO.Ports;
 using System;
@@ -13,6 +14,8 @@ public class EntryManager : MonoBehaviour
     public static int dataBaudRate = 9600;
     public static float dataObtainPeriod = 500f;
     public static string warningString;
+    public static string flightRecordsPath = "";
+    public static bool isMouseOverPathText = false;
 
     [SerializeField]
     TMP_Dropdown dropDown_Ports;
@@ -27,6 +30,9 @@ public class EntryManager : MonoBehaviour
     GameObject warningToolTip;
 
     [SerializeField]
+    TextMeshProUGUI pathText;
+
+    [SerializeField]
     Canvas canvas;
 
     // check bools
@@ -35,6 +41,9 @@ public class EntryManager : MonoBehaviour
 
     // entry parameters
     List<string> ports;
+
+    // tooltip for flight record path text area
+    GameObject pathTooltip;
 
     void Start()
     {
@@ -45,6 +54,21 @@ public class EntryManager : MonoBehaviour
         dropDown_Ports.AddOptions(ports);
         dropDown_BaudRates.value = 9;
         inputField_Period.text = "500";
+
+        pathTooltip = Instantiate(warningToolTip, canvas.transform);
+        pathTooltip.SetActive(false);
+    }
+
+    void Update()
+    {
+        if(isMouseOverPathText && flightRecordsPath != "")
+        {
+            warningString = "";
+            warningString += " " + flightRecordsPath;
+            pathTooltip.SetActive(true);
+        }
+        else
+            pathTooltip.SetActive(false);
     }
 
     public void TrySwitchScene()
@@ -122,5 +146,11 @@ public class EntryManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(SceneTransitions.instance.animationTime);
         SceneLoader.Load(SceneType.Main);
         SceneTransitions.instance.LightenGame();
+    }
+
+    public void OpenExplorer()
+    {
+        flightRecordsPath = EditorUtility.OpenFolderPanel("Select Record Path", "", "");
+        pathText.text = " " + flightRecordsPath;
     }
 }

@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using System.IO;
 using System.IO.Ports;
 using UnityEngine.UI;
 using TMPro;
-using System;
 using System.Linq;
 
 // DISPLAYED DATA
@@ -87,8 +88,27 @@ public class DisplayData : MonoBehaviour
     private int countValid = 0;
     private int countNotValid = 0;
 
+    // FLIGHT RECORD PARAMETERS
+    private string keyFlightRecordNumber = "keyFlightRecordCount";
+    private int flightRecordCount;
+    private string recordName = "";
+    private string recordFileName  = "";
+    private TextWriter textWriter;
+    private DateTime localDate;
+
     void Start()
     {
+        // get data from player pref about flight records
+        flightRecordCount = PlayerPrefs.GetInt(keyFlightRecordNumber, 0);
+        recordName = "/FlightRecord_" + flightRecordCount.ToString() + ".csv";
+        recordFileName = EntryManager.flightRecordsPath + recordName;
+        PlayerPrefs.SetInt(keyFlightRecordNumber, flightRecordCount + 1);
+        textWriter = new StreamWriter(recordFileName, false);
+        textWriter.WriteLine("LOCAL TIME" + ";" + "ID" + ";" + "TIME" + ";" + "ROCKET_LAT" + ";" + "ROCKET_LONG"
+            + ";" + "ALTITUDE" + ";" + "VELOCITY" + ";" + "ROLL" + ";" + "PITCH" + ";" + "FIRST" 
+            + ";" + "SECOND" + ";" + "BASE_LAT" + ";" + "BASE_LONG");
+        textWriter.Close();
+
         // assign data from EntryManager
         readPeriod = EntryManager.dataObtainPeriod;
         readPeriodRemaining = readPeriod;
@@ -221,6 +241,29 @@ public class DisplayData : MonoBehaviour
                     // pass lat long to the map script, base 7 8, rocket 0 1
                     SpawnOnMapCustom.instance.SetBasePosition(datas[9] + "," + datas[10]);
                     SpawnOnMapCustom.instance.SetRocketPosition(datas[2] + "," + datas[3]);
+
+                    // SAVE DATA TO EXCEL ---------------------------------------------------------------
+                    string excelString = "";
+                    // date, id and time
+                    localDate = DateTime.Now;
+                    excelString += localDate.Hour + ":" + localDate.Minute + ":" + localDate.Second + ";";
+                    for(int i=0; i < dataSize-2; i++)
+                    {
+                        // check for roll and pitch
+                        if (i == 6)
+                        {
+                            excelString += RPstrings[0].Replace('.', ',') + ";";
+                            excelString += RPstrings[1].Replace('.', ',') + ";";
+                        }
+                        else
+                            excelString += datas[i].Replace('.', ',') + ";";
+                    }
+
+                    textWriter = new StreamWriter(recordFileName, true);
+                    textWriter.WriteLine(excelString);
+                    textWriter.Close();
+
+                    // ----------------------------------------------------------------------------------
                 }
                 // -----------------------------------------------------------------------------------------
 

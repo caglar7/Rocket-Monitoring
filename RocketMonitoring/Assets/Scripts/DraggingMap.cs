@@ -161,7 +161,6 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
     }
 
     // give missing pointer type, show or hide pointers due to bool values
-    // this currently does only rocket pointer
     private void ShowHidePointers(MissingPointerType type)
     {
         switch(type)
