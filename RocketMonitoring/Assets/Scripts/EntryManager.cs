@@ -38,12 +38,14 @@ public class EntryManager : MonoBehaviour
     // check bools
     bool checkCOMPort;
     bool checkDataPeriod;
+    bool checkFlightRecordPath;
 
     // entry parameters
     List<string> ports;
 
-    // tooltip for flight record path text area
+    // flight record, tooltip, playerprefs key
     GameObject pathTooltip;
+    string keyFlightRecordPath = "keyFlightRecords";
 
     void Start()
     {
@@ -57,6 +59,10 @@ public class EntryManager : MonoBehaviour
 
         pathTooltip = Instantiate(warningToolTip, canvas.transform);
         pathTooltip.SetActive(false);
+
+        // get previous flight record from playerprefs
+        flightRecordsPath = PlayerPrefs.GetString(keyFlightRecordPath);
+        pathText.text = " " + flightRecordsPath;
     }
 
     void Update()
@@ -106,10 +112,17 @@ public class EntryManager : MonoBehaviour
             checkDataPeriod = false;
             warningString += "- Enter Data Period!\n";
         }
+        // flight record path directory check
+        checkFlightRecordPath = true;
+        if(flightRecordsPath == "")
+        {
+            checkFlightRecordPath = false;
+            warningString += "- Select Flight Record Path!\n";
+        }
         // CHECKS ARE DONE --------------------------------------------------   END
 
         // CHECK CONDITIONS ----------------------------------------------------
-        if(checkCOMPort == false || checkDataPeriod == false)
+        if (!checkCOMPort || !checkDataPeriod || !checkFlightRecordPath)
         {
             // show warning toolbar here, get rid of debugs and put a menu item
             GameObject toolTip = Instantiate(warningToolTip, canvas.transform);
@@ -152,5 +165,8 @@ public class EntryManager : MonoBehaviour
     {
         flightRecordsPath = EditorUtility.OpenFolderPanel("Select Record Path", "", "");
         pathText.text = " " + flightRecordsPath;
+
+        // save flight records path
+        PlayerPrefs.SetString(keyFlightRecordPath, flightRecordsPath);
     }
 }
