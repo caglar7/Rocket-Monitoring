@@ -105,7 +105,7 @@ public class DisplayData : MonoBehaviour
         PlayerPrefs.SetInt(keyFlightRecordNumber, flightRecordCount + 1);
         textWriter = new StreamWriter(recordFileName, false);
         textWriter.WriteLine("LOCAL TIME" + ";" + "ID" + ";" + "TIME" + ";" + "ROCKET_LAT" + ";" + "ROCKET_LONG"
-            + ";" + "ALTITUDE" + ";" + "VELOCITY" + ";" + "ROLL" + ";" + "PITCH" + ";" + "FIRST" 
+            + ";" + "ALTITUDE" + ";" + "VELOCITY" + ";" + "ROLL" + ";" + "PITCH" + ";" + "FIRST"
             + ";" + "SECOND" + ";" + "BASE_LAT" + ";" + "BASE_LONG");
         textWriter.Close();
 
@@ -247,7 +247,7 @@ public class DisplayData : MonoBehaviour
                     // date, id and time
                     localDate = DateTime.Now;
                     excelString += localDate.Hour + ":" + localDate.Minute + ":" + localDate.Second + ";";
-                    for(int i=0; i < dataSize-2; i++)
+                    for (int i = 0; i < dataSize - 2; i++)
                     {
                         // check for roll and pitch
                         if (i == 6)
@@ -267,6 +267,8 @@ public class DisplayData : MonoBehaviour
                 }
                 // -----------------------------------------------------------------------------------------
 
+                // print data to log screen
+                LogManager.instance.SendMessageToLog("DATA: " + receivedData);
             }
             catch (Exception e)
             {

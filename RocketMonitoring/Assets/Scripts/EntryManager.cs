@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using TMPro;
 using System.IO.Ports;
 using System;
 using System.Linq;
+using SimpleFileBrowser;
 
 public class EntryManager : MonoBehaviour
 {
@@ -44,7 +44,8 @@ public class EntryManager : MonoBehaviour
     List<string> ports;
 
     // flight record, tooltip, playerprefs key
-    GameObject pathTooltip;
+    GameObject pathToolTip;
+    bool isPathTipActive = false;
     string keyFlightRecordPath = "keyFlightRecords";
 
     void Start()
@@ -57,9 +58,6 @@ public class EntryManager : MonoBehaviour
         dropDown_BaudRates.value = 9;
         inputField_Period.text = "500";
 
-        pathTooltip = Instantiate(warningToolTip, canvas.transform);
-        pathTooltip.SetActive(false);
-
         // get previous flight record from playerprefs
         flightRecordsPath = PlayerPrefs.GetString(keyFlightRecordPath);
         pathText.text = " " + flightRecordsPath;
@@ -69,12 +67,27 @@ public class EntryManager : MonoBehaviour
     {
         if(isMouseOverPathText && flightRecordsPath != "")
         {
-            warningString = "";
-            warningString += " " + flightRecordsPath;
-            pathTooltip.SetActive(true);
+            if(isPathTipActive == false)
+            {
+                warningString = " " + flightRecordsPath;
+                isPathTipActive = true;
+                pathToolTip = Instantiate(warningToolTip, canvas.transform);
+            }
         }
         else
-            pathTooltip.SetActive(false);
+        {
+            if(pathToolTip != null)
+                pathToolTip.Destroy();
+            isPathTipActive = false;
+        }
+            
+
+        if(pathText.text != " " + flightRecordsPath)
+        {
+            pathText.text = " " + flightRecordsPath;
+            // save flight records path
+            PlayerPrefs.SetString(keyFlightRecordPath, flightRecordsPath);
+        }
     }
 
     public void TrySwitchScene()
@@ -114,7 +127,7 @@ public class EntryManager : MonoBehaviour
         }
         // flight record path directory check
         checkFlightRecordPath = true;
-        if(flightRecordsPath == "")
+        if (flightRecordsPath == "")
         {
             checkFlightRecordPath = false;
             warningString += "- Select Flight Record Path!\n";
@@ -163,10 +176,9 @@ public class EntryManager : MonoBehaviour
 
     public void OpenExplorer()
     {
-        flightRecordsPath = EditorUtility.OpenFolderPanel("Select Record Path", "", "");
-        pathText.text = " " + flightRecordsPath;
+        // open and assign file path here
+        FileBrowser.ShowLoadDialog((paths) => flightRecordsPath = paths[0], null,           
+                    FileBrowser.PickMode.Folders, false, null, null, "Select Folder", "Select");
 
-        // save flight records path
-        PlayerPrefs.SetString(keyFlightRecordPath, flightRecordsPath);
     }
 }

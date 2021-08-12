@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using Mapbox.Unity.MeshGeneration.Enums;
+using Mapbox.Unity.MeshGeneration.Data;
+using Mapbox.Unity.Utilities;
+using Mapbox.Unity.Map;
+using Mapbox.Map;
+using Mapbox.Unity.MeshGeneration.Factories;
 
 // THIS IS AN EXAMPLE EXCEL FILE CODE
 
