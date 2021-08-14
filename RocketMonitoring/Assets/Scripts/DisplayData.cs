@@ -100,7 +100,7 @@ public class DisplayData : MonoBehaviour
     {
         // get data from player pref about flight records
         flightRecordCount = PlayerPrefs.GetInt(keyFlightRecordNumber, 0);
-        recordName = "/FlightRecord_" + flightRecordCount.ToString() + ".csv";
+        recordName = "\\FlightRecord_" + flightRecordCount.ToString() + ".csv";
         recordFileName = EntryManager.flightRecordsPath + recordName;
         PlayerPrefs.SetInt(keyFlightRecordNumber, flightRecordCount + 1);
         textWriter = new StreamWriter(recordFileName, false);
@@ -262,8 +262,8 @@ public class DisplayData : MonoBehaviour
                     textWriter = new StreamWriter(recordFileName, true);
                     textWriter.WriteLine(excelString);
                     textWriter.Close();
-
                     // ----------------------------------------------------------------------------------
+
                 }
                 // -----------------------------------------------------------------------------------------
 
