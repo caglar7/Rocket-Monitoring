@@ -35,6 +35,7 @@ public class EntryManager : MonoBehaviour
     [SerializeField]
     Canvas canvas;
 
+    [Header("Menu Objects")]
     [SerializeField]
     private GameObject mainMenuObject;
 
@@ -62,6 +63,19 @@ public class EntryManager : MonoBehaviour
     bool isPathTipActive = false;
     string keyFlightRecordPath = "keyFlightRecords";
 
+    [Header("Offline Maps Parameters")]
+    [SerializeField]
+    private TileCacher tileCacher;
+
+    [SerializeField]
+    TMP_InputField inputField_TopLeft;
+
+    [SerializeField]
+    TMP_InputField inputField_BottomRight;
+
+    public static bool isDownloading = false;
+    public static bool isDownloadFinished = false;
+
     void Start()
     {
         // get menu animators
@@ -84,6 +98,13 @@ public class EntryManager : MonoBehaviour
 
     void Update()
     {
+        // check if tiles are downloaded and close offlinemaps menu
+        if(isDownloadFinished)
+        {
+            isDownloadFinished = false;
+            ActivateMainMenu();
+        }
+
         if(isMouseOverPathText && flightRecordsPath != "")
         {
             if(isPathTipActive == false)
@@ -257,4 +278,17 @@ public class EntryManager : MonoBehaviour
     }
 
     #endregion
+
+    public void DownloadTiles()
+    {
+        // make a proper string check later
+        string pointTopLeft = inputField_TopLeft.text;
+        string pointBottomRight = inputField_BottomRight.text;
+
+        if(!isDownloading)
+        {
+            isDownloading = true;
+            tileCacher.CacheTiles(17, pointTopLeft, pointBottomRight);
+        }
+    }
 }

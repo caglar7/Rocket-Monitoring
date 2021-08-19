@@ -169,7 +169,12 @@ public class TileCacher : MonoBehaviour
         Progress = (float)_currentProgress / _tileCountToFetch * 100;
         if (progressBarImage != null && progressBarImage.gameObject.activeInHierarchy) progressBarImage.fillAmount = Progress / 100;
         RenderImagery(arg2);
-        if (Progress == 100) CheckEnd();
+        if (Progress == 100)
+        {
+            EntryManager.isDownloading = false;
+            EntryManager.isDownloadFinished = true;
+            CheckEnd();
+        }
     }
     #endregion
 
