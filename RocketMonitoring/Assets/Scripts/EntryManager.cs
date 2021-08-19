@@ -35,6 +35,20 @@ public class EntryManager : MonoBehaviour
     [SerializeField]
     Canvas canvas;
 
+    [SerializeField]
+    private GameObject mainMenuObject;
+
+    [SerializeField]
+    private GameObject offlineMapsMenuObject;
+
+    // menu animators and bool parameters
+    private Animator animatorMainMenu;
+    private Animator animatorOfflineMapsMenu;
+    private bool isMainActive = true;
+    private bool isOfflineActive = false;
+    // just a little longer than real animation time
+    [SerializeField] float animationTime = 0.35f;
+
     // check bools
     bool checkCOMPort;
     bool checkDataPeriod;
@@ -50,6 +64,11 @@ public class EntryManager : MonoBehaviour
 
     void Start()
     {
+        // get menu animators
+        animatorMainMenu = mainMenuObject.GetComponent<Animator>();
+        animatorOfflineMapsMenu = offlineMapsMenuObject.GetComponent<Animator>();
+        ActivateMainMenu();
+
         // get available ports
         ports = SerialPort.GetPortNames().ToList();
 
@@ -181,4 +200,61 @@ public class EntryManager : MonoBehaviour
                     FileBrowser.PickMode.Folders, false, null, null, "Select Folder", "Select");
 
     }
+
+    #region Menu Switching Methods
+
+    public void ActivateMainMenu()
+    {
+        // make sure to call only once on initial button click
+        if(!isMainActive)
+        {
+            offlineMapsMenuObject.GetComponent<CanvasGroup>().interactable = false;
+            animatorOfflineMapsMenu.SetBool("ActivateMenu", false);
+            animatorOfflineMapsMenu.SetBool("DeactivateMenu", true);
+
+            animatorMainMenu.SetBool("ActivateMenu", true);
+            animatorMainMenu.SetBool("DeactivateMenu", false);
+
+            StartCoroutine(WaitActivateMainMenu());
+        }
+    }
+
+    IEnumerator WaitActivateMainMenu()
+    {
+        yield return new WaitForSeconds(animationTime);
+        offlineMapsMenuObject.SetActive(false);
+        mainMenuObject.GetComponent<CanvasGroup>().interactable = true;
+
+        // when code is done
+        isMainActive = true;
+        isOfflineActive = false;
+    }
+
+    public void ActivateOfflineMapsMenu()
+    {
+        if(!isOfflineActive)
+        {
+            offlineMapsMenuObject.SetActive(true);
+            offlineMapsMenuObject.GetComponent<CanvasGroup>().interactable = false;
+            animatorOfflineMapsMenu.SetBool("ActivateMenu", true);
+            animatorOfflineMapsMenu.SetBool("DeactivateMenu", false);
+
+            mainMenuObject.GetComponent<CanvasGroup>().interactable = false;
+            animatorMainMenu.SetBool("ActivateMenu", false);
+            animatorMainMenu.SetBool("DeactivateMenu", true);
+
+            StartCoroutine(WaitActivateOfflineMenu());
+        }
+    }
+
+    IEnumerator WaitActivateOfflineMenu()
+    {
+        yield return new WaitForSeconds(animationTime);
+        offlineMapsMenuObject.GetComponent<CanvasGroup>().interactable = true;
+        // when done
+        isOfflineActive = true;
+        isMainActive = false;
+    }
+
+    #endregion
 }
