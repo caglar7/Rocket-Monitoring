@@ -53,6 +53,8 @@ public class DisplayData : MonoBehaviour
     [Header("Velocity Parameters")]
     [SerializeField]
     SpeedometerController speedometer;
+    [SerializeField]
+    SpeedometerController speedometerPayload;
 
     [Header("Altitude Parameters")]
     [SerializeField]
@@ -373,6 +375,7 @@ public class DisplayData : MonoBehaviour
         // velocity unit conversion and set on speedometer, 3
         float speedData_meters = float.Parse(datas[5]) / 100f;
         speedometer.SetSpeed(speedData_meters);
+        Debug.Log("speed meters: " + speedData_meters);
 
         // assign rotation directions string on the RocketController.cs, 4
         string[] RPstrings = datas[6].Split(',');
@@ -420,9 +423,13 @@ public class DisplayData : MonoBehaviour
         // assign payload positions on minimap
         SpawnOnMapCustom.instance.SetPayLoadPosition(datas[2] + "," + datas[3]);
 
-        // assign payload speed
+        // assign payload altitude
         float altitudeData = float.Parse(datas[4]) / 100f;
         textAltitudePayload.text = altitudeData.ToString();
+
+        // assign payload speed
+        float speedData_meters = float.Parse(datas[5]) / 100f;
+        speedometerPayload.SetSpeed(speedData_meters);
     }
 }
 
