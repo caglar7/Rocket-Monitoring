@@ -6,6 +6,13 @@ using System.IO.Ports;
 using System;
 using System.Linq;
 using SimpleFileBrowser;
+using Mapbox.Utils;
+using Mapbox.Unity.Utilities;
+
+// TO RESET EVERY SAVED DATA OR MAP DATA
+// GO MAPBOX>SETUP>CLEAR FILE CACHE ,  later will be from code
+// THEN DELETE PLAYERPREFS
+
 
 public class EntryManager : MonoBehaviour
 {
@@ -68,16 +75,23 @@ public class EntryManager : MonoBehaviour
     private TileCacher tileCacher;
 
     [SerializeField]
-    TMP_InputField inputField_TopLeft;
+    private TMP_InputField inputField_TopLeft;
 
     [SerializeField]
-    TMP_InputField inputField_BottomRight;
+    private TMP_InputField inputField_BottomRight;
 
     public static bool isDownloading = false;
     public static bool isDownloadFinished = false;
+    public static int downloadedTiles = 0;
+    public static string keyDownloadedTiles = "keyDownloadedTiles";
+    private const int TILE_LIMIT = 3000;
 
     void Start()
     {
+        // get downloaded tile amoung, later this will be the accurate cached tile amount
+        downloadedTiles = PlayerPrefs.GetInt(keyDownloadedTiles, 0);
+        tileCacher.UpdateTileLimitText(downloadedTiles);
+
         // get menu animators
         animatorMainMenu = mainMenuObject.GetComponent<Animator>();
         animatorOfflineMapsMenu = offlineMapsMenuObject.GetComponent<Animator>();
@@ -272,6 +286,7 @@ public class EntryManager : MonoBehaviour
     {
         yield return new WaitForSeconds(animationTime);
         offlineMapsMenuObject.GetComponent<CanvasGroup>().interactable = true;
+        tileCacher.UpdateTileLimitText(downloadedTiles);
         // when done
         isOfflineActive = true;
         isMainActive = false;
@@ -281,14 +296,57 @@ public class EntryManager : MonoBehaviour
 
     public void DownloadTiles()
     {
+        // later add token exception handling and entering tokens in application
         // make a proper string check later
+        warningString = "";
+        bool checkString1 = false;
+        bool checkString2 = false;
+        bool checkConnection = false;
+        bool checkTileLimit = false;
+
         string pointTopLeft = inputField_TopLeft.text;
         string pointBottomRight = inputField_BottomRight.text;
 
-        if(!isDownloading)
+        // check input fields
+        if (Conversions.StringToLatLon(pointTopLeft).GetType().ToString() == "Mapbox.Utils.Vector2d")
+            checkString1 = true;
+        if (Conversions.StringToLatLon(pointBottomRight).GetType().ToString() == "Mapbox.Utils.Vector2d")
+            checkString2 = true;
+
+        // check network connection
+        if (Application.internetReachability != NetworkReachability.NotReachable)
+            checkConnection = true;
+
+        // check tile counts
+        int tileCountToDownload = 0;
+        if (checkString1 && checkString2)
+        {
+            tileCountToDownload = tileCacher.GetTileCount(17, pointTopLeft, pointBottomRight);
+            if ((downloadedTiles + tileCountToDownload) <= TILE_LIMIT)
+                checkTileLimit = true;
+        }
+
+        // add warning message and return at this point
+        // first check should have different method to handle, not conversion get type stuff
+        if(!checkString1 || !checkString2)
+            warningString += "- Check Input Fields (lat / long)!\n";
+        if(!checkConnection)
+            warningString += "- Check Network Connection!\n";
+        if(!checkTileLimit)
+            warningString += "- Map is too large to download (" + (downloadedTiles + tileCountToDownload).ToString() + "/" + TILE_LIMIT + ")";
+
+        if(!checkString1 || !checkString2 || !checkConnection || !checkTileLimit)
+        {
+            GameObject toolTip = Instantiate(warningToolTip, canvas.transform);
+            Destroy(toolTip, 3f);
+            return;
+        }
+
+        if (!isDownloading)
         {
             isDownloading = true;
             tileCacher.CacheTiles(17, pointTopLeft, pointBottomRight);
         }
     }
+
 }

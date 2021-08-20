@@ -32,6 +32,8 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
     [SerializeField]
     private GameObject prefabBasePointer;
     [SerializeField]
+    private GameObject prefabPayLoadPointer;
+    [SerializeField]
     private RectTransform upLeftRT;
     [SerializeField]
     private RectTransform upRightRT;
@@ -43,6 +45,7 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
     private List<RectTransform> cornerRTList;
     private GameObject rocketPointer;
     private GameObject basePointer;
+    private GameObject payLoadPointer;
 
     // missing pointer conditions for rocket, base and payload
     // set pointeron check
@@ -71,6 +74,7 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
         // instantiate and deactivate pointer UI objects
         rocketPointer = Instantiate(prefabRocketPointer, gameObject.transform);
         basePointer = Instantiate(prefabBasePointer, gameObject.transform);
+        payLoadPointer = Instantiate(prefabPayLoadPointer, gameObject.transform);
     }
 
     void Update()
@@ -99,6 +103,7 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
         // Activate or Deactivate missing pointers, base, rocket and payload
         ShowHidePointers(MissingPointerType.RocketPointer);
         ShowHidePointers(MissingPointerType.BasePointer);
+        ShowHidePointers(MissingPointerType.PayLoadPointer);
 
         // Move missing pointers on minimap
         if(basePointerOn && basePointerActive)
@@ -108,6 +113,10 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
         if (rocketPointerOn && rocketPointerActive)
         {
             rocketPointer.GetComponent<MissingPointerControl>().MovePointer(cornerRTList, rocketOutsideDir, rocketOutsideScale);
+        }
+        if (payloadPointerOn && payloadPointerActive)
+        {
+            payLoadPointer.GetComponent<MissingPointerControl>().MovePointer(cornerRTList, payloadOutsideDir, payloadOutsideScale);
         }
     }
 
@@ -190,6 +199,20 @@ public class DraggingMap : MonoBehaviour, IBeginDragHandler, IEndDragHandler, ID
                 {
                     basePointerActive = false;
                     basePointer.SetActive(false);
+                }
+                break;
+
+            case MissingPointerType.PayLoadPointer:
+
+                if (payloadPointerOn && payloadPointerActive == false)
+                {
+                    payloadPointerActive = true;
+                    payLoadPointer.SetActive(true);
+                }
+                else if (payloadPointerOn == false && payloadPointerActive)
+                {
+                    payloadPointerActive = false;
+                    payLoadPointer.SetActive(false);
                 }
                 break;
         }

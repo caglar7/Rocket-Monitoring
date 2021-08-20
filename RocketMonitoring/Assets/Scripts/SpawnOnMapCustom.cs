@@ -46,6 +46,11 @@ public class SpawnOnMapCustom : MonoBehaviour
 	Vector2d[] _diffValues;
 	float _locationSetPeriod = 1f; // matches with data obtain period
 
+	Vector2d nextBasePosition;
+	Vector2d nextRocketPosition;
+	Vector2d nextPayLoadPosition;
+	Vector2d initialDiffBase, initialDiffRocket, initialDiffPayLoad;
+
 	const float _WIDTH = 51.32f;
 	const float _HEIGHT = 45.92f;
 	float _prevDragX = 0f;
@@ -96,7 +101,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 			_locations[i] = Conversions.StringToLatLon(locationString);
 			var instance = Instantiate(_markerPrefabs[i]);
 
-			Vector3 rawPosition = _map.GeoToWorldPosition(_locations[i], true);
+			Vector3 rawPosition = _map.GeoToWorldPosition(_locations[i], false);
 			instance.transform.localPosition = new Vector3(rawPosition.x, _yPosition, rawPosition.z);
 			instance.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 			_spawnedObjects.Add(instance);
@@ -184,10 +189,27 @@ public class SpawnOnMapCustom : MonoBehaviour
 		// location adding doesn't check if it reaches the target point, check it out
 		// BASE POSITION SMOOTH UPDATE
 		_locations[0] += (_diffValues[0] * Time.deltaTime / _locationSetPeriod);
-		
+		initialDiffBase -= (_diffValues[0] * Time.deltaTime / _locationSetPeriod);
+		if((initialDiffBase.x * _diffValues[0].x <= 0f) && (initialDiffBase.y * _diffValues[0].y <= 0f))
+        {
+			_locations[0] = nextBasePosition;
+        }
+
 		// ROCKET POSITION SMOOTH UPDATE
 		_locations[1] += (_diffValues[1] * Time.deltaTime / _locationSetPeriod);
-		
+		initialDiffRocket -= (_diffValues[1] * Time.deltaTime / _locationSetPeriod);
+		if ((initialDiffRocket.x * _diffValues[1].x <= 0f) && (initialDiffRocket.y * _diffValues[1].y <= 0f))
+		{
+			_locations[1] = nextRocketPosition;
+		}
+
+		// PAYLOAD POSITION SMOOTH UPDATE
+		_locations[2] += (_diffValues[2] * Time.deltaTime / _locationSetPeriod);
+		initialDiffPayLoad -= (_diffValues[2] * Time.deltaTime / _locationSetPeriod);
+		if ((initialDiffPayLoad.x * _diffValues[2].x <= 0f) && (initialDiffPayLoad.y * _diffValues[2].y <= 0f))
+		{
+			_locations[2] = nextPayLoadPosition;
+		}
 
 		//	SET MARKER LOCATIONS -------------------------------------------------------------------------------
 		int count = _spawnedObjects.Count;
@@ -196,7 +218,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 			var spawnedObject = _spawnedObjects[i];
 			var location = _locations[i];
 
-			Vector3 rawPosition = _map.GeoToWorldPosition(location, true);
+			Vector3 rawPosition = _map.GeoToWorldPosition(location, false);
 			spawnedObject.transform.localPosition = new Vector3(rawPosition.x, _yPosition, rawPosition.z);
 			spawnedObject.transform.localScale = new Vector3(_spawnScale, _spawnScale, _spawnScale);
 
@@ -225,6 +247,18 @@ public class SpawnOnMapCustom : MonoBehaviour
 					DraggingMap.rocketOutsideScale = PointerScale(rocketOffset, dir);
 				}
 			}
+			// payload
+			if (i == 2)
+			{
+				Vector3 payLoadOffset = spawnedObject.transform.position - _mapCamera.transform.position;
+				Vector2 dir = OverBoundDirection(payLoadOffset);
+				DraggingMap.payloadPointerOn = (dir != Vector2.zero) ? true : false;
+				if (DraggingMap.payloadPointerOn)
+				{
+					DraggingMap.payloadOutsideDir = dir;
+					DraggingMap.payloadOutsideScale = PointerScale(payLoadOffset, dir);
+				}
+			}
 		}
 		//	---------------------------------------------------------------------------------------------------------
 
@@ -235,11 +269,12 @@ public class SpawnOnMapCustom : MonoBehaviour
 	public void SetBasePosition(string locString)
     {
 		// assign location difference
-		Vector2d nextBasePosition = Conversions.StringToLatLon(locString);
+		nextBasePosition = Conversions.StringToLatLon(locString);
 		_diffValues[0] = nextBasePosition - _locations[0];
+		initialDiffBase = nextBasePosition - _locations[0];
 
 		// take base position in world position
-		Vector3 baseWorldPos = _map.GeoToWorldPosition(nextBasePosition, true);
+		Vector3 baseWorldPos = _map.GeoToWorldPosition(nextBasePosition, false);
 
 		// set camera target and initial positions
 		if (_setCameraTarget == false)
@@ -254,15 +289,18 @@ public class SpawnOnMapCustom : MonoBehaviour
 	public void SetRocketPosition(string locString)
     {
 		// assign location difference
-		Vector2d nextRocketPosition = Conversions.StringToLatLon(locString);
+		nextRocketPosition = Conversions.StringToLatLon(locString);
 		_diffValues[1] = nextRocketPosition - _locations[1];
-
-		// take rocket position in world position
-		Vector3 rocketWorldPos = _map.GeoToWorldPosition(nextRocketPosition, true);
+		initialDiffRocket = nextRocketPosition - _locations[1];
 	}
 
-	// create PayLoad location set method later
-	// ...
+	public void SetPayLoadPosition(string locString)
+	{
+		// assign location difference
+		nextPayLoadPosition = Conversions.StringToLatLon(locString);
+		_diffValues[2] = nextPayLoadPosition - _locations[2];
+		initialDiffPayLoad = nextPayLoadPosition - _locations[2];
+	}
 
 
 	// output Vector2 (x, y)
@@ -327,7 +365,6 @@ public class SpawnOnMapCustom : MonoBehaviour
 
 
 /*
-
 		// CAMERA ZOOM ##############################################################################
 		// get zoom level
 		double distanceLat = Mathd.Abs(_locations[1].x - _locations[0].x);

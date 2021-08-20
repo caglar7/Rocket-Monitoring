@@ -9,6 +9,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using Mapbox.Unity.Map.Interfaces;
 using Mapbox.Unity.Map;
+using Mapbox.Platform.Cache;
+using TMPro;
+using Mapbox.Unity;
 
 public class TileCacher : MonoBehaviour
 {
@@ -23,6 +26,10 @@ public class TileCacher : MonoBehaviour
 
     [Header("Tile Object")]
     [SerializeField] GameObject tilePlaneObject;
+
+    [Header("Cached Tile / Limit Text")]
+    [SerializeField]
+    private TextMeshProUGUI textTilesLimit;
 
     [Header("Area Data")]
     public List<string> Points;
@@ -54,6 +61,7 @@ public class TileCacher : MonoBehaviour
         ImageFetcher = ScriptableObject.CreateInstance<ImageDataFetcher>();
         ImageFetcher.DataRecieved += ImageDataReceived;
         ImageFetcher.FetchingError += ImageDataError;
+        
     }
 
     public void CacheTiles(int _zoomLevel, string _topLeft, string _bottomRight)
@@ -123,6 +131,7 @@ public class TileCacher : MonoBehaviour
         }
 
         _tileCountToFetch = (maxx - minx) * (maxy - miny);
+
         if (_tileCountToFetch == 0)
         {
             OnTileCachingEnd.Invoke(Status.NOTHING_TO_CAHCE, 0);
@@ -196,6 +205,11 @@ public class TileCacher : MonoBehaviour
                 OnTileCachingEnd.Invoke(Status.SOME_CACHED, _tileCountToFetch - _failedTileCount);
             }
         }
+
+        // this should be deleted later if cached tiles amount is obtained
+        EntryManager.downloadedTiles += _tileCountToFetch - _failedTileCount;
+        PlayerPrefs.SetInt(EntryManager.keyDownloadedTiles, EntryManager.downloadedTiles);
+        UpdateTileLimitText(EntryManager.downloadedTiles);
     }
 
     private void RenderImagery(RasterTile rasterTile)
@@ -216,4 +230,74 @@ public class TileCacher : MonoBehaviour
         Log += message;
     }
     #endregion
+
+    public int GetTileCount(int _zoomLevel, string _topLeft, string _bottomRight)
+    {
+        ZoomLevel = _zoomLevel;
+        Points = new List<string>();
+        Points.Add(_topLeft);
+        Points.Add(_bottomRight);
+
+        var pointMeters = new List<UnwrappedTileId>();
+        foreach (var point in Points)
+        {
+            var pointVector = Conversions.StringToLatLon(point);
+            var pointMeter = Conversions.LatitudeLongitudeToTileId(pointVector.x, pointVector.y, ZoomLevel);
+            pointMeters.Add(pointMeter);
+        }
+
+        var minx = int.MaxValue;
+        var maxx = int.MinValue;
+        var miny = int.MaxValue;
+        var maxy = int.MinValue;
+
+        foreach (var meter in pointMeters)
+        {
+            if (meter.X < minx)
+            {
+                minx = meter.X;
+            }
+
+            if (meter.X > maxx)
+            {
+                maxx = meter.X;
+            }
+
+            if (meter.Y < miny)
+            {
+                miny = meter.Y;
+            }
+
+            if (meter.Y > maxy)
+            {
+                maxy = meter.Y;
+            }
+        }
+
+        if (maxx == minx)
+        {
+            maxx++;
+            minx--;
+        }
+
+        if (maxy == miny)
+        {
+            maxy++;
+            miny--;
+        }
+
+        return (maxx - minx) * (maxy - miny);
+    }
+
+    public void ClearCach()
+    {
+        MapboxAccess.Instance.ClearAllCacheFiles();
+        UpdateTileLimitText(0);
+    }
+
+    public void UpdateTileLimitText(int value)
+    {
+        textTilesLimit.text = value.ToString() + "/3000";
+        PlayerPrefs.SetInt(EntryManager.keyDownloadedTiles, 0);
+    }
 }

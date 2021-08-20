@@ -46,7 +46,7 @@ namespace Mapbox.Unity.Utilities
 			var latLonSplit = s.Split(',');
 			if (latLonSplit.Length != 2)
 			{
-				throw new ArgumentException("Wrong number of arguments");
+				Debug.LogError("Wrong number of arguments");
 			}
 
 			double latitude = 0;
@@ -54,14 +54,13 @@ namespace Mapbox.Unity.Utilities
 
 			if (!double.TryParse(latLonSplit[0], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out latitude))
 			{
-				throw new Exception(string.Format("Could not convert latitude to double: {0}", latLonSplit[0]));
+				Debug.LogError(string.Format("Could not convert latitude to double: {0}", latLonSplit[0]));
 			}
 
 			if (!double.TryParse(latLonSplit[1], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out longitude))
 			{
-				throw new Exception(string.Format("Could not convert longitude to double: {0}", latLonSplit[0]));
+				Debug.LogError(string.Format("Could not convert longitude to double: {0}", latLonSplit[0]));
 			}
-
 			return new Vector2d(latitude, longitude);
 		}
 

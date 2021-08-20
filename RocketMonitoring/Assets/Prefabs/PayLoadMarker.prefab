@@ -78,7 +78,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 728546980047635627}
-  m_Text: AvionicBay
+  m_Text: PayLoad
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1
@@ -104,7 +104,7 @@ GameObject:
   - component: {fileID: 832959481753945817}
   - component: {fileID: 832890803783506171}
   m_Layer: 10
-  m_Name: AvionicBayMarker
+  m_Name: PayLoadMarker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

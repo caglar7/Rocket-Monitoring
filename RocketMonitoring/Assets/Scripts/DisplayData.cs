@@ -18,10 +18,10 @@ using System.Linq;
     A       0
     ID      1
     TIME    2
-    LAT     3
-    LONG    4 
-    A       5
-    V       6
+    LAT     3.
+    LONG    4 .
+    A       5.
+    V       6.
     AN      7
     FRT     8
     SND     9
@@ -57,6 +57,8 @@ public class DisplayData : MonoBehaviour
     [Header("Altitude Parameters")]
     [SerializeField]
     TextMeshProUGUI textAltitude;
+    [SerializeField]
+    TextMeshProUGUI textAltitudePayload;
 
     [Header("Parachute Displays")]
     [SerializeField]
@@ -95,6 +97,14 @@ public class DisplayData : MonoBehaviour
     private string recordFileName  = "";
     private TextWriter textWriter;
     private DateTime localDate;
+
+    void InitSerialPort()
+    {
+        StopBits stopBits = StopBits.One;
+        sp = new SerialPort(EntryManager.dataCOM, EntryManager.dataBaudRate, 0, 8, stopBits);
+        sp.ReadTimeout = 100;
+        sp.Open();
+    }
 
     void Start()
     {
@@ -215,54 +225,12 @@ public class DisplayData : MonoBehaviour
                         LogManager.instance.SendMessageToLog("First Data is obtained");
                     }
 
-                    // altitude display, convert float then format to proper string
-                    float altitudeData = float.Parse(datas[4]) / 100f;
-                    textAltitude.text = altitudeData.ToString();
+                    // check if id 0 or 1
+                    if (datas[0] == "0")
+                        ModelRocket(datas);
 
-                    // velocity unit conversion and set on speedometer, 3
-                    float speedData_meters = float.Parse(datas[5]) / 100f;
-                    speedometer.SetSpeed(speedData_meters);
-
-                    // assign rotation directions string on the RocketController.cs, 4
-                    string[] RPstrings = datas[6].Split(',');
-                    RocketController.instance.RotateRocket(RPstrings[0], RPstrings[1]);
-
-                    // 1st parachute
-                    if (datas[7] == "1")
-                        firstParachute.color = greenColor;
-                    else if (datas[7] == "0")
-                        firstParachute.color = defaultColor;
-                    // 2nd parachute
-                    if (datas[8] == "1")
-                        secondParachute.color = greenColor;
-                    else if (datas[8] == "0")
-                        secondParachute.color = defaultColor;
-
-                    // pass lat long to the map script, base 7 8, rocket 0 1
-                    SpawnOnMapCustom.instance.SetBasePosition(datas[9] + "," + datas[10]);
-                    SpawnOnMapCustom.instance.SetRocketPosition(datas[2] + "," + datas[3]);
-
-                    // SAVE DATA TO EXCEL ---------------------------------------------------------------
-                    string excelString = "";
-                    // date, id and time
-                    localDate = DateTime.Now;
-                    excelString += localDate.Hour + ":" + localDate.Minute + ":" + localDate.Second + ";";
-                    for (int i = 0; i < dataSize - 2; i++)
-                    {
-                        // check for roll and pitch
-                        if (i == 6)
-                        {
-                            excelString += RPstrings[0].Replace('.', ',') + ";";
-                            excelString += RPstrings[1].Replace('.', ',') + ";";
-                        }
-                        else
-                            excelString += datas[i].Replace('.', ',') + ";";
-                    }
-
-                    textWriter = new StreamWriter(recordFileName, true);
-                    textWriter.WriteLine(excelString);
-                    textWriter.Close();
-                    // ----------------------------------------------------------------------------------
+                    else if (datas[0] == "1")
+                        ModelPayLoad(datas); 
 
                 }
                 // -----------------------------------------------------------------------------------------
@@ -277,6 +245,7 @@ public class DisplayData : MonoBehaviour
         }
     }
 
+    #region Error Handling
     // return type of error there is
     ErrorType ProfileError(string rawDataString)
     {
@@ -393,13 +362,67 @@ public class DisplayData : MonoBehaviour
 
         Debug.Log("Usable String : " + usableDataString);
     }
+    #endregion
 
-    void InitSerialPort()
+    private void ModelRocket(List<string> datas)
     {
-        StopBits stopBits = StopBits.One;
-        sp = new SerialPort(EntryManager.dataCOM, EntryManager.dataBaudRate, 0, 8, stopBits);
-        sp.ReadTimeout = 100;
-        sp.Open();
+        // altitude display, convert float then format to proper string
+        float altitudeData = float.Parse(datas[4]) / 100f;
+        textAltitude.text = altitudeData.ToString();
+
+        // velocity unit conversion and set on speedometer, 3
+        float speedData_meters = float.Parse(datas[5]) / 100f;
+        speedometer.SetSpeed(speedData_meters);
+
+        // assign rotation directions string on the RocketController.cs, 4
+        string[] RPstrings = datas[6].Split(',');
+        RocketController.instance.RotateRocket(RPstrings[0], RPstrings[1]);
+
+        // 1st parachute
+        if (datas[7] == "1")
+            firstParachute.color = greenColor;
+        else if (datas[7] == "0")
+            firstParachute.color = defaultColor;
+        // 2nd parachute
+        if (datas[8] == "1")
+            secondParachute.color = greenColor;
+        else if (datas[8] == "0")
+            secondParachute.color = defaultColor;
+
+        // pass lat long to the map script, base 7 8, rocket 0 1
+        SpawnOnMapCustom.instance.SetBasePosition(datas[9] + "," + datas[10]);
+        SpawnOnMapCustom.instance.SetRocketPosition(datas[2] + "," + datas[3]);
+
+        // SAVE DATA TO EXCEL ---------------------------------------------------------------
+        string excelString = "";
+        // date, id and time
+        localDate = DateTime.Now;
+        excelString += localDate.Hour + ":" + localDate.Minute + ":" + localDate.Second + ";";
+        for (int i = 0; i < dataSize - 2; i++)
+        {
+            // check for roll and pitch
+            if (i == 6)
+            {
+                excelString += RPstrings[0].Replace('.', ',') + ";";
+                excelString += RPstrings[1].Replace('.', ',') + ";";
+            }
+            else
+                excelString += datas[i].Replace('.', ',') + ";";
+        }
+
+        textWriter = new StreamWriter(recordFileName, true);
+        textWriter.WriteLine(excelString);
+        textWriter.Close();
+    }
+
+    private void ModelPayLoad(List<string> datas)
+    {
+        // assign payload positions on minimap
+        SpawnOnMapCustom.instance.SetPayLoadPosition(datas[2] + "," + datas[3]);
+
+        // assign payload speed
+        float altitudeData = float.Parse(datas[4]) / 100f;
+        textAltitudePayload.text = altitudeData.ToString();
     }
 }
 
