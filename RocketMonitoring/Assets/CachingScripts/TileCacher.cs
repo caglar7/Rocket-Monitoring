@@ -24,6 +24,9 @@ public class TileCacher : MonoBehaviour
     }
     public delegate void TileCacherEvent(Status result, int FetchedTileCount);
 
+    [Header("Warning UI Object")]
+    [SerializeField] GameObject _warningToolTip;
+
     [Header("Tile Object")]
     [SerializeField] GameObject tilePlaneObject;
 
@@ -37,7 +40,12 @@ public class TileCacher : MonoBehaviour
     public int ZoomLevel;
 
     [Header("Output")]
-    public float Progress;
+    public float Progress = 0f;
+    private float prevProgress = 0f;
+    [SerializeField] private float progressTimeOutPeriod = 10f;
+    private float timeoutTimer = 0f;
+    private bool isTimerOn = false;
+
     [TextArea(10, 20)]
     public string Log;
     private ImageDataFetcher ImageFetcher;
@@ -58,10 +66,49 @@ public class TileCacher : MonoBehaviour
 
     private void Start()
     {
+        // download progress parameters
+        timeoutTimer = progressTimeOutPeriod;
+
         // ImageFetcher = new ImageDataFetcher();
         ImageFetcher = ScriptableObject.CreateInstance<ImageDataFetcher>();
         ImageFetcher.DataRecieved += ImageDataReceived;
         ImageFetcher.FetchingError += ImageDataError; 
+    }
+
+    void Update()
+    {
+        if(EntryManager.isDownloading)
+        {
+            if (Progress != prevProgress || Progress == 0f)
+            {
+                prevProgress = Progress;
+                isTimerOn = false;
+                timeoutTimer = progressTimeOutPeriod;
+            }
+            else
+            {
+                isTimerOn = true;
+            }
+
+            if (isTimerOn == true)
+            {
+                timeoutTimer -= Time.deltaTime;
+                if (timeoutTimer <= 0f)
+                {
+                    // download failed, guide user
+                    EntryManager.isDownloading = false;
+                    EntryManager.isDownloadFinished = true;
+                    CheckEnd();
+
+                    // tooptip
+                    EntryManager.warningString = "";
+                    EntryManager.warningString += "- Download Failed, Try Again!\n";
+                    GameObject toolTip = Instantiate(_warningToolTip, _canvas.transform);
+                    Destroy(toolTip, 5f);
+                }
+                Debug.Log("TimeOut timer: " + timeoutTimer);
+            }
+        }
     }
 
     public void CacheTiles(int _zoomLevel, string _topLeft, string _bottomRight)
@@ -77,6 +124,7 @@ public class TileCacher : MonoBehaviour
     public void PullTiles()
     {
         Progress = 0;
+        prevProgress = 0;
         _tileCountToFetch = 0;
         _currentProgress = 0;
         _failedTileCount = 0;
@@ -182,6 +230,7 @@ public class TileCacher : MonoBehaviour
             progressBarText.text = "Progress " + ((int)Progress).ToString() + " %";
         }
         RenderImagery(arg2);
+
         if (Progress == 100)
         {
             EntryManager.isDownloading = false;

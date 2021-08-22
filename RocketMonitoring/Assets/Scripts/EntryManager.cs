@@ -8,6 +8,7 @@ using System.Linq;
 using SimpleFileBrowser;
 using Mapbox.Utils;
 using Mapbox.Unity.Utilities;
+using System.Globalization;
 
 // TO RESET EVERY SAVED DATA OR MAP DATA
 // GO MAPBOX>SETUP>CLEAR FILE CACHE ,  later will be from code
@@ -311,16 +312,24 @@ public class EntryManager : MonoBehaviour
         bool checkString1 = false;
         bool checkString2 = false;
         bool checkConnection = false;
-        bool checkTileLimit = false;
+        bool checkTileLimit = true;
 
-        string pointTopLeft = inputField_TopLeft.text;
-        string pointBottomRight = inputField_BottomRight.text;
+        string rawPointTopLeft = inputField_TopLeft.text;
+        string rawPointBottomRight = inputField_BottomRight.text;
+
+        string pointTopLeft = rawPointTopLeft.Replace(" ", "");
+        string pointBottomRight = rawPointBottomRight.Replace(" ", "");
+
+        Debug.Log("top left: " + pointTopLeft);
+        Debug.Log("bottom right: " + pointBottomRight);
 
         // check input fields
-        if (Conversions.StringToLatLon(pointTopLeft).GetType().ToString() == "Mapbox.Utils.Vector2d")
-            checkString1 = true;
-        if (Conversions.StringToLatLon(pointBottomRight).GetType().ToString() == "Mapbox.Utils.Vector2d")
-            checkString2 = true;
+        checkString1 = CheckLatLongString(pointTopLeft);
+        checkString2 = CheckLatLongString(pointBottomRight);
+
+
+        // test delete later
+        
 
         // check network connection
         if (Application.internetReachability != NetworkReachability.NotReachable)
@@ -333,6 +342,8 @@ public class EntryManager : MonoBehaviour
             tileCountToDownload = tileCacher.GetTileCount(17, pointTopLeft, pointBottomRight);
             if ((downloadedTiles + tileCountToDownload) <= TILE_LIMIT)
                 checkTileLimit = true;
+            else
+                checkTileLimit = false;
         }
 
         // add warning message and return at this point
@@ -342,7 +353,7 @@ public class EntryManager : MonoBehaviour
         if(!checkConnection)
             warningString += "- Check Network Connection!\n";
         if(!checkTileLimit)
-            warningString += "- Map is too large to download (" + (downloadedTiles + tileCountToDownload).ToString() + "/" + TILE_LIMIT + ")";
+            warningString += "- Map is too large to download (" + (downloadedTiles + tileCountToDownload).ToString() + "/" + TILE_LIMIT + ")\n";
 
         if(!checkString1 || !checkString2 || !checkConnection || !checkTileLimit)
         {
@@ -356,6 +367,45 @@ public class EntryManager : MonoBehaviour
             isDownloading = true;
             tileCacher.CacheTiles(17, pointTopLeft, pointBottomRight);
         }
+    }
+
+    private bool CheckLatLongString(string s)
+    {
+        bool boolResult;
+
+        foreach(char c in s)
+        {
+            if (Char.IsDigit(c) || c == ',' || c == '.')
+            {
+                // don't do anything
+            }
+            else 
+                return false;
+        }
+        try
+        {
+            var latLonSplit = s.Split(',');
+            double latitude = 0;
+            double longitude = 0;
+
+            if (!double.TryParse(latLonSplit[0], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out latitude))
+            {
+                Debug.LogError(string.Format("Could not convert latitude to double: {0}", latLonSplit[0]));
+            }
+
+            if (!double.TryParse(latLonSplit[1], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out longitude))
+            {
+                Debug.LogError(string.Format("Could not convert longitude to double: {0}", latLonSplit[0]));
+            }
+            Vector2d latlongVector = new Vector2d(latitude, longitude);
+            boolResult = true;
+
+        }
+        catch
+        {
+            boolResult = false;
+        }
+        return boolResult;
     }
 
 }

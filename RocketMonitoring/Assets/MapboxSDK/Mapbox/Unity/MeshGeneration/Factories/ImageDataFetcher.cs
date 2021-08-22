@@ -42,6 +42,7 @@ public class ImageDataFetcher : DataFetcher
 
 			if (rasterTile.HasError)
 			{
+				// throw a download error and tell user to try downloading again
 				FetchingError(imageDataParameters.tile, rasterTile, new TileErrorEventArgs(imageDataParameters.tile.CanonicalTileId, rasterTile.GetType(), imageDataParameters.tile, rasterTile.Exceptions));
 			}
 			else
