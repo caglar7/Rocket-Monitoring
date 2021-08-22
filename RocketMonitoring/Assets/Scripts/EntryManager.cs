@@ -95,7 +95,7 @@ public class EntryManager : MonoBehaviour
         // get menu animators
         animatorMainMenu = mainMenuObject.GetComponent<Animator>();
         animatorOfflineMapsMenu = offlineMapsMenuObject.GetComponent<Animator>();
-        ActivateMainMenu();
+        offlineMapsMenuObject.SetActive(false);
 
         // get available ports
         ports = SerialPort.GetPortNames().ToList();
@@ -257,6 +257,8 @@ public class EntryManager : MonoBehaviour
     IEnumerator WaitActivateMainMenu()
     {
         yield return new WaitForSeconds(animationTime);
+        tileCacher.ResetProgressBar();
+
         offlineMapsMenuObject.SetActive(false);
         mainMenuObject.GetComponent<CanvasGroup>().interactable = true;
 
@@ -270,6 +272,9 @@ public class EntryManager : MonoBehaviour
         if(!isOfflineActive)
         {
             offlineMapsMenuObject.SetActive(true);
+            inputField_TopLeft.text = "";
+            inputField_BottomRight.text = "";
+
             offlineMapsMenuObject.GetComponent<CanvasGroup>().interactable = false;
             animatorOfflineMapsMenu.SetBool("ActivateMenu", true);
             animatorOfflineMapsMenu.SetBool("DeactivateMenu", false);

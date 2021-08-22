@@ -733,6 +733,7 @@ MonoBehaviour:
   DoesLog: 1
   DoesRender: 0
   progressBarImage: {fileID: 1517100893}
+  progressBarText: {fileID: 881549181}
   _map: {fileID: 0}
 --- !u!4 &156529884
 Transform:

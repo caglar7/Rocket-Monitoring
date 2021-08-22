@@ -49,6 +49,7 @@ public class TileCacher : MonoBehaviour
     [SerializeField] bool DoesLog = false;
     [SerializeField] bool DoesRender = false;
     [SerializeField] Image progressBarImage;
+    [SerializeField] TextMeshProUGUI progressBarText;
     public event TileCacherEvent OnTileCachingEnd;
 
     // edited parameters
@@ -60,8 +61,7 @@ public class TileCacher : MonoBehaviour
         // ImageFetcher = new ImageDataFetcher();
         ImageFetcher = ScriptableObject.CreateInstance<ImageDataFetcher>();
         ImageFetcher.DataRecieved += ImageDataReceived;
-        ImageFetcher.FetchingError += ImageDataError;
-        
+        ImageFetcher.FetchingError += ImageDataError; 
     }
 
     public void CacheTiles(int _zoomLevel, string _topLeft, string _bottomRight)
@@ -176,7 +176,11 @@ public class TileCacher : MonoBehaviour
     {
         _currentProgress++;
         Progress = (float)_currentProgress / _tileCountToFetch * 100;
-        if (progressBarImage != null && progressBarImage.gameObject.activeInHierarchy) progressBarImage.fillAmount = Progress / 100;
+        if (progressBarImage != null && progressBarImage.gameObject.activeInHierarchy)
+        {
+            progressBarImage.fillAmount = Progress / 100;
+            progressBarText.text = "Progress " + ((int)Progress).ToString() + " %";
+        }
         RenderImagery(arg2);
         if (Progress == 100)
         {
@@ -292,12 +296,23 @@ public class TileCacher : MonoBehaviour
     public void ClearCach()
     {
         MapboxAccess.Instance.ClearAllCacheFiles();
+        EntryManager.downloadedTiles = 0;
+        PlayerPrefs.SetInt(EntryManager.keyDownloadedTiles, 0);
         UpdateTileLimitText(0);
     }
 
     public void UpdateTileLimitText(int value)
     {
         textTilesLimit.text = value.ToString() + "/3000";
-        PlayerPrefs.SetInt(EntryManager.keyDownloadedTiles, 0);
+        PlayerPrefs.SetInt(EntryManager.keyDownloadedTiles, value);
+    }
+
+    public void ResetProgressBar()
+    {
+        if (progressBarImage != null && progressBarImage.gameObject.activeInHierarchy)
+        {
+            progressBarImage.fillAmount = 0f;
+            progressBarText.text = "Progress";
+        }
     }
 }
