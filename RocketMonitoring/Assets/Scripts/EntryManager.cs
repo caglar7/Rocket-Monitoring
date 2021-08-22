@@ -272,8 +272,6 @@ public class EntryManager : MonoBehaviour
         if(!isOfflineActive)
         {
             offlineMapsMenuObject.SetActive(true);
-            inputField_TopLeft.text = "";
-            inputField_BottomRight.text = "";
 
             offlineMapsMenuObject.GetComponent<CanvasGroup>().interactable = false;
             animatorOfflineMapsMenu.SetBool("ActivateMenu", true);
@@ -292,6 +290,12 @@ public class EntryManager : MonoBehaviour
         yield return new WaitForSeconds(animationTime);
         offlineMapsMenuObject.GetComponent<CanvasGroup>().interactable = true;
         tileCacher.UpdateTileLimitText(downloadedTiles);
+
+        inputField_TopLeft.text = "";
+        inputField_BottomRight.text = "";
+        inputField_TopLeft.resetOnDeActivation = true;
+        inputField_BottomRight.resetOnDeActivation = true;
+
         // when done
         isOfflineActive = true;
         isMainActive = false;
