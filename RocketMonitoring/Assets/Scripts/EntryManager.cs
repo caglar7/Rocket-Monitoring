@@ -59,17 +59,20 @@ public class EntryManager : MonoBehaviour
     [SerializeField] float animationTime = 0.35f;
 
     // check bools
-    bool checkCOMPort;
-    bool checkDataPeriod;
-    bool checkFlightRecordPath;
+    private bool checkCOMPort;
+    private bool checkDataPeriod;
+    private bool checkFlightRecordPath;
 
     // entry parameters
-    List<string> ports;
+    private List<string> ports;
+    private List<string> checkPorts;
+    private float periodPorts = 1f;
+    private float timerPorts = 0f;
 
     // flight record, tooltip, playerprefs key
-    GameObject pathToolTip;
-    bool isPathTipActive = false;
-    string keyFlightRecordPath = "keyFlightRecords";
+    private GameObject pathToolTip;
+    private bool isPathTipActive = false;
+    private string keyFlightRecordPath = "keyFlightRecords";
 
     [Header("Offline Maps Parameters")]
     [SerializeField]
@@ -98,11 +101,9 @@ public class EntryManager : MonoBehaviour
         animatorOfflineMapsMenu = offlineMapsMenuObject.GetComponent<Animator>();
         offlineMapsMenuObject.SetActive(false);
 
-        // get available ports
-        ports = SerialPort.GetPortNames().ToList();
+        // update drop down ports
+        UpdatePorts();
 
-        // set initial values, for quick tests
-        dropDown_Ports.AddOptions(ports);
         dropDown_BaudRates.value = 9;
         inputField_Period.text = "500";
 
@@ -113,8 +114,18 @@ public class EntryManager : MonoBehaviour
 
     void Update()
     {
+        // check ports, if there is a change update it
+        timerPorts += Time.deltaTime;
+        if(timerPorts >= periodPorts)
+        {
+            timerPorts = 0f;
+            checkPorts = SerialPort.GetPortNames().ToList();
+            if (checkPorts != ports)
+                UpdatePorts();
+        }
+
         // check if tiles are downloaded and close offlinemaps menu
-        if(isDownloadFinished)
+        if (isDownloadFinished)
         {
             isDownloadFinished = false;
             ActivateMainMenu();
@@ -237,8 +248,8 @@ public class EntryManager : MonoBehaviour
 
     }
 
-    #region Menu Switching Methods
 
+    #region Menu Switching Methods
     public void ActivateMainMenu()
     {
         // make sure to call only once on initial button click
@@ -301,8 +312,8 @@ public class EntryManager : MonoBehaviour
         isOfflineActive = true;
         isMainActive = false;
     }
-
     #endregion
+
 
     public void DownloadTiles()
     {
@@ -320,16 +331,9 @@ public class EntryManager : MonoBehaviour
         string pointTopLeft = rawPointTopLeft.Replace(" ", "");
         string pointBottomRight = rawPointBottomRight.Replace(" ", "");
 
-        Debug.Log("top left: " + pointTopLeft);
-        Debug.Log("bottom right: " + pointBottomRight);
-
         // check input fields
         checkString1 = CheckLatLongString(pointTopLeft);
         checkString2 = CheckLatLongString(pointBottomRight);
-
-
-        // test delete later
-        
 
         // check network connection
         if (Application.internetReachability != NetworkReachability.NotReachable)
@@ -408,4 +412,10 @@ public class EntryManager : MonoBehaviour
         return boolResult;
     }
 
+    private void UpdatePorts()
+    {
+        ports = SerialPort.GetPortNames().ToList();
+        dropDown_Ports.ClearOptions();
+        dropDown_Ports.AddOptions(ports);
+    }
 }

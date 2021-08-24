@@ -27,6 +27,7 @@ public class SpeedometerController : MonoBehaviour
 
     float speedDiff = 0f;
     float speedSetTime = 1f;
+    bool isPositive = true;
 
     void Start()
     {
@@ -47,12 +48,20 @@ public class SpeedometerController : MonoBehaviour
         pinTransform.eulerAngles = new Vector3(0f, 0f, angle);
 
         // update speed text
-        textSpeed.text = speed.ToString("0.0");
+        if(isPositive)
+            textSpeed.text = speed.ToString("0.0");
+        else
+            textSpeed.text = "-" + speed.ToString("0.0");
     }
 
     public void SetSpeed(float s)
     {
-        speedTarget = s;
-        speedDiff = s - speed;
+        if (s >= 0f)
+            isPositive = true;
+        else
+            isPositive = false;
+
+        speedTarget = Mathf.Abs(s);
+        speedDiff = Mathf.Abs(s) - speed;
     }
 }

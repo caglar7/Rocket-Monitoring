@@ -232,7 +232,7 @@ public class DisplayData : MonoBehaviour
                         ModelRocket(datas);
 
                     else if (datas[0] == "1")
-                        ModelPayLoad(datas); 
+                        ModelPayLoad(datas);
 
                 }
                 // -----------------------------------------------------------------------------------------
@@ -375,7 +375,6 @@ public class DisplayData : MonoBehaviour
         // velocity unit conversion and set on speedometer, 3
         float speedData_meters = float.Parse(datas[5]) / 100f;
         speedometer.SetSpeed(speedData_meters);
-        Debug.Log("speed meters: " + speedData_meters);
 
         // assign rotation directions string on the RocketController.cs, 4
         string[] RPstrings = datas[6].Split(',');
