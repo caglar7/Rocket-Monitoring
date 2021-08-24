@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using System.IO.Ports;
 using System;
@@ -49,6 +50,12 @@ public class EntryManager : MonoBehaviour
 
     [SerializeField]
     private GameObject offlineMapsMenuObject;
+
+    [SerializeField]
+    private GameObject clearCacheMenuObject;
+
+    [SerializeField]
+    private Button clearCacheButton;
 
     // menu animators and bool parameters
     private Animator animatorMainMenu;
@@ -110,6 +117,9 @@ public class EntryManager : MonoBehaviour
         // get previous flight record from playerprefs
         flightRecordsPath = PlayerPrefs.GetString(keyFlightRecordPath);
         pathText.text = " " + flightRecordsPath;
+
+        // deactivate clear cach menu
+        DeactivateClearCacheMenu();
     }
 
     void Update()
@@ -255,6 +265,7 @@ public class EntryManager : MonoBehaviour
         // make sure to call only once on initial button click
         if(!isMainActive)
         {
+            DeactivateClearCacheMenu();
             offlineMapsMenuObject.GetComponent<CanvasGroup>().interactable = false;
             animatorOfflineMapsMenu.SetBool("ActivateMenu", false);
             animatorOfflineMapsMenu.SetBool("DeactivateMenu", true);
@@ -418,4 +429,23 @@ public class EntryManager : MonoBehaviour
         dropDown_Ports.ClearOptions();
         dropDown_Ports.AddOptions(ports);
     }
+
+    public void ActivateClearCacheMenu()
+    {
+        clearCacheMenuObject.SetActive(true);
+        clearCacheButton.interactable = false;
+    }
+
+    public void DeactivateClearCacheMenu()
+    {
+        clearCacheMenuObject.SetActive(false);
+        clearCacheButton.interactable = true;
+    }
+
+    public void EntryClearCache()
+    {
+        tileCacher.ClearCache();
+        DeactivateClearCacheMenu();
+    }
+
 }

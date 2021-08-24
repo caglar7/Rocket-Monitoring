@@ -342,7 +342,7 @@ public class TileCacher : MonoBehaviour
         return (maxx - minx) * (maxy - miny);
     }
 
-    public void ClearCach()
+    public void ClearCache()
     {
         MapboxAccess.Instance.ClearAllCacheFiles();
         EntryManager.downloadedTiles = 0;

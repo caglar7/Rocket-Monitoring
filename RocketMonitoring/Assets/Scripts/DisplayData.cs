@@ -97,7 +97,10 @@ public class DisplayData : MonoBehaviour
     private int flightRecordCount;
     private string recordName = "";
     private string recordFileName  = "";
+    private string recordNamePayload = "";
+    private string recordFileNamePayload = "";
     private TextWriter textWriter;
+    private TextWriter textWriterPayload;
     private DateTime localDate;
 
     void InitSerialPort()
@@ -114,12 +117,23 @@ public class DisplayData : MonoBehaviour
         flightRecordCount = PlayerPrefs.GetInt(keyFlightRecordNumber, 0);
         recordName = "\\FlightRecord_" + flightRecordCount.ToString() + ".csv";
         recordFileName = EntryManager.flightRecordsPath + recordName;
+
+        // paylaod csv file
+        recordNamePayload = "\\FlightRecordPayload_" + flightRecordCount.ToString() + ".csv";
+        recordFileNamePayload = EntryManager.flightRecordsPath + recordNamePayload;
+
         PlayerPrefs.SetInt(keyFlightRecordNumber, flightRecordCount + 1);
         textWriter = new StreamWriter(recordFileName, false);
         textWriter.WriteLine("LOCAL TIME" + ";" + "ID" + ";" + "TIME" + ";" + "ROCKET_LAT" + ";" + "ROCKET_LONG"
             + ";" + "ALTITUDE" + ";" + "VELOCITY" + ";" + "ROLL" + ";" + "PITCH" + ";" + "FIRST"
             + ";" + "SECOND" + ";" + "BASE_LAT" + ";" + "BASE_LONG");
         textWriter.Close();
+
+        // writing to payload csv file
+        textWriterPayload = new StreamWriter(recordFileNamePayload, false);
+        textWriterPayload.WriteLine("LOCAL TIME" + ";" + "ID" + ";" + "TIME" + ";" + "PAYLOAD_LAT" + ";" + "PAYLOAD_LONG"
+            + ";" + "ALTITUDE" + ";" + "VELOCITY");
+        textWriterPayload.Close();
 
         // assign data from EntryManager
         readPeriod = EntryManager.dataObtainPeriod;
@@ -415,6 +429,8 @@ public class DisplayData : MonoBehaviour
         textWriter = new StreamWriter(recordFileName, true);
         textWriter.WriteLine(excelString);
         textWriter.Close();
+
+        // ------------------------------------------------------------------------------------
     }
 
     private void ModelPayLoad(List<string> datas)
@@ -425,10 +441,26 @@ public class DisplayData : MonoBehaviour
         // assign payload altitude
         float altitudeData = float.Parse(datas[4]) / 100f;
         textAltitudePayload.text = altitudeData.ToString();
+        textAltitudePayload.text = altitudeData.ToString();
 
         // assign payload speed
         float speedData_meters = float.Parse(datas[5]) / 100f;
         speedometerPayload.SetSpeed(speedData_meters);
+
+        // SAVE DATA TO EXCEL -----------------------------------------------------------------
+        string excelString = "";
+        // date
+        localDate = DateTime.Now;
+        excelString += localDate.Hour + ":" + localDate.Minute + ":" + localDate.Second + ";";
+        // writing id, time, lat, long, altitude, speed, till index 5
+        for(int i=0; i<6; i++)
+        {
+            excelString += datas[i].Replace('.', ',') + ";";
+        }
+        textWriterPayload = new StreamWriter(recordFileNamePayload, true);
+        textWriterPayload.WriteLine(excelString);
+        textWriterPayload.Close();
+        // ------------------------------------------------------------------------------------
     }
 }
 
