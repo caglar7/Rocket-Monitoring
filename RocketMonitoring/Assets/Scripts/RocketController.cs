@@ -34,7 +34,35 @@ public class RocketController : MonoBehaviour
 
     [Header("Rocket Materials")]
     [SerializeField]
-    Material[] rocketMaterials;
+    private Material[] rocketMaterials;
+
+    [Header("Rocket Model Parts")]
+    [SerializeField]
+    private GameObject rocketFull;
+
+    [Header("Parts Main Object")]
+    [SerializeField]
+    private GameObject rocketPart_All;
+
+    [Header("Parts First Depart")]
+    [SerializeField]
+    private GameObject rocketPart_Bottom;
+    [SerializeField]
+    private GameObject rocketPart_MiddleTop;
+    [SerializeField]
+    private float forceMagnitudeFirst = 1f;
+
+    [Header("Parts Second Depart")]
+    [SerializeField]
+    private GameObject rocketPart_Middle;
+    [SerializeField]
+    private GameObject rocketPart_Top;
+    [SerializeField]
+    private float forceMagnitudeSecond = 1f;
+
+    // depart modeling
+    private bool applyOnceFirst = false;
+    private bool applyOnceSecond = false;
     
 
     void Awake()
@@ -50,11 +78,17 @@ public class RocketController : MonoBehaviour
         // set initial material
         angleSetTime = EntryManager.dataObtainPeriod;
         SetRocketMaterial(0);
+
+        // deactivate rocket parts
+        rocketPart_All.gameObject.SetActive(false);
     }
 
     
     void Update()
     {
+        if (rocketFull.activeInHierarchy == false)
+            return;
+
         if (rollDiff == 0f && pitchDiff == 0f)
             return;
 
@@ -72,10 +106,27 @@ public class RocketController : MonoBehaviour
 
         // rotation
         transform.rotation = Quaternion.Euler(rollSet, 0f, pitchSet);
+
+        // check rotation to do open parachute test 
+        if (Mathf.Abs(rollSet) >= 70f || Mathf.Abs(pitchSet) >= 70f)
+            OpenFirstParachute();
+    }
+
+    void FixedUpdate()
+    {
+        if(applyOnceFirst)
+        {
+            applyOnceFirst = false;
+            rocketPart_MiddleTop.GetComponent<Rigidbody>().AddForce(transform.up * forceMagnitudeFirst, ForceMode.Impulse);
+            rocketPart_Bottom.GetComponent<Rigidbody>().AddForce(-1 * transform.up * forceMagnitudeFirst, ForceMode.Impulse);
+        }
     }
 
     public void RotateRocket(string rollString, string pitchString)
     {
+        if (rocketFull.activeInHierarchy == false)
+            return;
+
         rollPrev = rollCurrent;
         pitchPrev = pitchCurrent;
 
@@ -96,7 +147,17 @@ public class RocketController : MonoBehaviour
     // index 0 for glow, 1 for hull material
     public void SetRocketMaterial(int index)
     {
-        GetComponent<MeshRenderer>().material = rocketMaterials[index];
+        if(rocketFull.activeInHierarchy)
+            rocketFull.GetComponent<MeshRenderer>().material = rocketMaterials[index];
+
+        // set all individual materials
+        if (rocketPart_All.activeInHierarchy)
+        {
+            rocketPart_Bottom.GetComponent<MeshRenderer>().material = rocketMaterials[index];
+            rocketPart_Middle.GetComponent<MeshRenderer>().material = rocketMaterials[index];
+            rocketPart_Top.GetComponent<MeshRenderer>().material = rocketMaterials[index];
+        }
+
         materialSelected = index;
         LogManager.instance.SendMessageToLog("Rocket Model " + index + " is selected");
     }
@@ -110,5 +171,18 @@ public class RocketController : MonoBehaviour
         float signedRoundAngle = (angle > 0f) ? (roundAngle) : (-roundAngle);
         float value = (Mathf.Abs(modValue) >= (roundAngle / 2f)) ? (signedRoundAngle - modValue) : (-modValue);
         return angle + value;
+    }
+
+    public void OpenFirstParachute()
+    {
+        // activate parts object
+        rocketFull.gameObject.SetActive(false);
+        rocketPart_All.gameObject.SetActive(true);
+
+        // set proper materials
+        SetRocketMaterial(materialSelected);
+
+        // impulse to bottom and middletop part
+        applyOnceFirst = true;
     }
 }

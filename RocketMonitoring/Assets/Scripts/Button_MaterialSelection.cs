@@ -16,9 +16,6 @@ public class Button_MaterialSelection : MonoBehaviour
     {
         button = GetComponent<Button>();
         button.onClick.AddListener(SetMaterial);
-
-        // activate or disable button with info from the rocket
-        // ...
     }
 
     void SetMaterial()
