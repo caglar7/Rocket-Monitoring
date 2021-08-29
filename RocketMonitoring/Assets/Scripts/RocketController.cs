@@ -63,6 +63,7 @@ public class RocketController : MonoBehaviour
     // depart modeling
     private bool applyOnceFirst = false;
     private bool applyOnceSecond = false;
+ 
     
 
     void Awake()
@@ -119,6 +120,13 @@ public class RocketController : MonoBehaviour
             applyOnceFirst = false;
             rocketPart_MiddleTop.GetComponent<Rigidbody>().AddForce(transform.up * forceMagnitudeFirst, ForceMode.Impulse);
             rocketPart_Bottom.GetComponent<Rigidbody>().AddForce(-1 * transform.up * forceMagnitudeFirst, ForceMode.Impulse);
+        }
+        if(applyOnceSecond)
+        {
+            applyOnceSecond = false;
+            Vector3 secondForceDir = rocketPart_MiddleTop.transform.up;
+            rocketPart_Top.GetComponent<Rigidbody>().AddForce(secondForceDir * forceMagnitudeSecond, ForceMode.Impulse);
+            rocketPart_Middle.GetComponent<Rigidbody>().AddForce(-1 * secondForceDir * forceMagnitudeSecond, ForceMode.Impulse);
         }
     }
 
@@ -184,5 +192,19 @@ public class RocketController : MonoBehaviour
 
         // impulse to bottom and middletop part
         applyOnceFirst = true;
+    }
+
+    public void OpenSecondParachute()
+    {
+        rocketPart_Top.AddComponent<Rigidbody>();
+        rocketPart_Middle.AddComponent<Rigidbody>();
+
+        applyOnceSecond = true;
+    }
+
+    IEnumerator WaitAndOpenSecond()
+    {
+        yield return new WaitForSeconds(1f);
+        OpenSecondParachute();
     }
 }
