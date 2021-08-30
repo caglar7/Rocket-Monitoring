@@ -333,8 +333,6 @@ public class DisplayData : MonoBehaviour
         int indexB1 = rawDataString.IndexOf('B');
         int indexB2 = rawDataString.LastIndexOf('B');
 
-        Debug.Log("Error Storage: " + errorStorageString);
-
         switch (type)
         {
             // when there is no data, reset strings and init serial port
@@ -375,8 +373,6 @@ public class DisplayData : MonoBehaviour
                 errorStorageString += rawDataString.Substring(indexA2);
                 break;
         }
-
-        Debug.Log("Usable String : " + usableDataString);
     }
     #endregion
 

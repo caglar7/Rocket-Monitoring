@@ -16,6 +16,8 @@ using UnityEngine;
     LONG_B  8
 */
 
+// when rotating kinematic body, might use fixed joint parts for better illustration
+
 public class RocketController : MonoBehaviour
 {
     // static variable that's assigned from DisplayData.cs
@@ -60,12 +62,41 @@ public class RocketController : MonoBehaviour
     [SerializeField]
     private float forceMagnitudeSecond = 1f;
 
+    [Header("First Depart Objects")]
+    [SerializeField]
+    private Rigidbody rbMiddleTop;
+    [SerializeField]
+    private Rigidbody rbMiddleTopFixed;
+    [SerializeField]
+    private Rigidbody rbBottom;
+    [SerializeField]
+    private Rigidbody[] rbFirstRope;
+    [SerializeField]
+    private float setFirstKinematicTime = 1f;
+
+    [Header("Second Depart Objects")]
+    [SerializeField]
+    private GameObject sphere_FixedTop;
+    [SerializeField]
+    private GameObject[] secondRope;
+    [SerializeField]
+    private float setSecondKinematicTime = 1f;
+
     // depart modeling
     private bool applyOnceFirst = false;
     private bool applyOnceSecond = false;
- 
-    
 
+    // making sure depart models called once
+    private bool isFirstKey = false;
+    private bool isSecondKey = false;
+    private bool checkFirstOpened = false;
+
+    [Header("TEST OPENING PARACHUTES")]
+    [SerializeField]
+    private bool openFirst = false;
+    [SerializeField]
+    private bool openSecond = false;
+ 
     void Awake()
     {
         if (instance == null)
@@ -109,13 +140,26 @@ public class RocketController : MonoBehaviour
         transform.rotation = Quaternion.Euler(rollSet, 0f, pitchSet);
 
         // check rotation to do open parachute test 
-        if (Mathf.Abs(rollSet) >= 70f || Mathf.Abs(pitchSet) >= 70f)
-            OpenFirstParachute();
+
     }
 
     void FixedUpdate()
     {
-        if(applyOnceFirst)
+        if (openFirst)
+        {
+            openFirst = false;
+            OpenFirstParachute();
+            Debug.Log("opening 1");
+        }
+
+        if (openSecond)
+        {
+            openSecond = false;
+            Debug.Log("opening 2");
+            OpenSecondParachute();
+        }
+
+        if (applyOnceFirst)
         {
             applyOnceFirst = false;
             rocketPart_MiddleTop.GetComponent<Rigidbody>().AddForce(transform.up * forceMagnitudeFirst, ForceMode.Impulse);
@@ -126,7 +170,7 @@ public class RocketController : MonoBehaviour
             applyOnceSecond = false;
             Vector3 secondForceDir = rocketPart_MiddleTop.transform.up;
             rocketPart_Top.GetComponent<Rigidbody>().AddForce(secondForceDir * forceMagnitudeSecond, ForceMode.Impulse);
-            rocketPart_Middle.GetComponent<Rigidbody>().AddForce(-1 * secondForceDir * forceMagnitudeSecond, ForceMode.Impulse);
+            //rocketPart_Middle.GetComponent<Rigidbody>().AddForce(-1 * secondForceDir * forceMagnitudeSecond, ForceMode.Impulse);
         }
     }
 
@@ -181,6 +225,7 @@ public class RocketController : MonoBehaviour
         return angle + value;
     }
 
+    #region Open First Parachute
     public void OpenFirstParachute()
     {
         // activate parts object
@@ -192,19 +237,111 @@ public class RocketController : MonoBehaviour
 
         // impulse to bottom and middletop part
         applyOnceFirst = true;
-    }
 
+        // set gravity right away, kinematic after some time
+        SetFirstDepartGravity(false);
+        SetFirstObjectsKinematic();
+    }
+    #endregion
+
+    #region Open Second Parachute
     public void OpenSecondParachute()
     {
+        // add components and open second parachute
+        // give second objects rigidbodies, fixed joints
         rocketPart_Top.AddComponent<Rigidbody>();
+        rocketPart_Top.AddComponent<FixedJoint>();
+        sphere_FixedTop.AddComponent<Rigidbody>();
+        sphere_FixedTop.AddComponent<FixedJoint>();
+
         rocketPart_Middle.AddComponent<Rigidbody>();
+        rocketPart_Middle.AddComponent<FixedJoint>();
+
+        // connect rope and objects
+        rocketPart_Top.GetComponent<FixedJoint>().connectedBody = sphere_FixedTop.GetComponent<Rigidbody>();
+        sphere_FixedTop.GetComponent<FixedJoint>().connectedBody = rocketPart_Top.GetComponent<Rigidbody>();
+        secondRope[0].GetComponent<SpringJoint>().connectedBody = sphere_FixedTop.GetComponent<Rigidbody>();
+
+        rocketPart_Middle.GetComponent<FixedJoint>().connectedBody = secondRope[secondRope.Length - 1].GetComponent<Rigidbody>();
+        secondRope[secondRope.Length - 1].GetComponent<FixedJoint>().connectedBody = rocketPart_Middle.GetComponent<Rigidbody>();
+        
+        // middle rocket part is kinematic, rest of them can change
+        rocketPart_Middle.GetComponent<Rigidbody>().isKinematic = true;
+        SetSecondObjectsKinematic(true);
+
+        // set kinematic to false and apply force to top part
+        SetSecondDepartGravity(false);
+        SetSecondObjectsKinematic(false);
+        StartCoroutine(WaitAndSecondKinematic());
 
         applyOnceSecond = true;
     }
+    #endregion
 
-    IEnumerator WaitAndOpenSecond()
+    #region First Depart Kinematic
+    public void SetFirstObjectsKinematic()
     {
-        yield return new WaitForSeconds(1f);
-        OpenSecondParachute();
+        StartCoroutine(WaitAndFirstKinematic());
     }
+
+    IEnumerator WaitAndFirstKinematic()
+    {
+        yield return new WaitForSeconds(setFirstKinematicTime);
+
+        // set object rb to kinematic and disable gravity
+        rbMiddleTop.isKinematic = true;
+        rbMiddleTopFixed.isKinematic = true;
+        rbBottom.isKinematic = true;
+        foreach(Rigidbody r in rbFirstRope)
+        {
+            r.isKinematic = true;
+        }
+
+        // right after it's gonna start rotating down and moving
+    }
+    #endregion
+
+    #region Second Depart Kinematic
+    public void SetSecondObjectsKinematic(bool setValue)
+    {
+        rocketPart_Top.GetComponent<Rigidbody>().isKinematic = setValue;
+        sphere_FixedTop.GetComponent<Rigidbody>().isKinematic = setValue;
+        foreach (GameObject g in secondRope)
+        {
+            g.GetComponent<Rigidbody>().isKinematic = setValue; 
+        }
+    }
+
+    IEnumerator WaitAndSecondKinematic()
+    {
+        yield return new WaitForSeconds(setSecondKinematicTime);
+        SetSecondObjectsKinematic(true);
+    }
+    #endregion
+
+    #region First Depart Gravity
+    public void SetFirstDepartGravity(bool isUsing)
+    {
+        rbMiddleTop.useGravity = isUsing;
+        rbMiddleTopFixed.useGravity = isUsing;
+        rbBottom.useGravity = isUsing;
+        foreach (Rigidbody r in rbFirstRope)
+        {
+            r.useGravity = isUsing;
+        }
+    }
+    #endregion
+
+    #region Second Depart Gravity
+    public void SetSecondDepartGravity(bool isUsing)
+    {
+        rocketPart_Top.GetComponent<Rigidbody>().useGravity = isUsing;
+        rocketPart_Middle.GetComponent<Rigidbody>().useGravity = isUsing;
+        sphere_FixedTop.GetComponent<Rigidbody>().useGravity = isUsing;
+        foreach(GameObject g in secondRope)
+        {
+            g.GetComponent<Rigidbody>().useGravity = isUsing;
+        }
+    }
+    #endregion
 }
