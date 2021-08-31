@@ -85,11 +85,9 @@ public class RocketController : MonoBehaviour
     // depart modeling
     private bool applyOnceFirst = false;
     private bool applyOnceSecond = false;
-
-    // making sure depart models called once
-    private bool isFirstKey = false;
-    private bool isSecondKey = false;
-    private bool checkFirstOpened = false;
+    private float departAngleSetTime = 1.5f;
+    private float departRollAngle = 0f;
+    private float departPitchAngle = 0f;
 
     [Header("TEST OPENING PARACHUTES")]
     [SerializeField]
@@ -118,7 +116,9 @@ public class RocketController : MonoBehaviour
     
     void Update()
     {
-        if (rocketFull.activeInHierarchy == false)
+        // timer to wait for first depart kinematic
+
+        if (rocketFull.activeInHierarchy == false && Mathf.Abs(rollSet) == 90f || Mathf.Abs(pitchSet) == 90f)
             return;
 
         if (rollDiff == 0f && pitchDiff == 0f)
@@ -138,9 +138,6 @@ public class RocketController : MonoBehaviour
 
         // rotation
         transform.rotation = Quaternion.Euler(rollSet, 0f, pitchSet);
-
-        // check rotation to do open parachute test 
-
     }
 
     void FixedUpdate()
@@ -161,6 +158,24 @@ public class RocketController : MonoBehaviour
 
         if (applyOnceFirst)
         {
+            // rotate departed rocket to proper position
+            float rollAngle = transform.rotation.eulerAngles.x;
+            float pitchAngle = transform.rotation.eulerAngles.z;
+            rollAngle = (rollAngle >= 270f) ? (rollAngle - 360f) : rollAngle;
+            pitchAngle = (pitchAngle >= 270f) ? (pitchAngle - 360f) : pitchAngle;
+
+            if (Mathf.Abs(rollAngle) >= Mathf.Abs(pitchAngle))
+            {
+                departRollAngle = (rollAngle >= 0f) ? 90f : -90f;
+                departPitchAngle = pitchAngle;
+            }
+            else
+            {
+                departPitchAngle = (pitchAngle >= 0f) ? 90f : -90f;
+                departRollAngle = rollAngle;
+            }
+            RotateDepartedRocket(departRollAngle, departPitchAngle);
+
             applyOnceFirst = false;
             rocketPart_MiddleTop.GetComponent<Rigidbody>().AddForce(transform.up * forceMagnitudeFirst, ForceMode.Impulse);
             rocketPart_Bottom.GetComponent<Rigidbody>().AddForce(-1 * transform.up * forceMagnitudeFirst, ForceMode.Impulse);
@@ -170,7 +185,6 @@ public class RocketController : MonoBehaviour
             applyOnceSecond = false;
             Vector3 secondForceDir = rocketPart_MiddleTop.transform.up;
             rocketPart_Top.GetComponent<Rigidbody>().AddForce(secondForceDir * forceMagnitudeSecond, ForceMode.Impulse);
-            //rocketPart_Middle.GetComponent<Rigidbody>().AddForce(-1 * secondForceDir * forceMagnitudeSecond, ForceMode.Impulse);
         }
     }
 
@@ -192,6 +206,23 @@ public class RocketController : MonoBehaviour
         rollDiff = rollCurrent - rollPrev;
         pitchDiff = pitchCurrent - pitchPrev;
         
+        rollSet = rollPrev;
+        pitchSet = pitchPrev;
+    }
+
+    private void RotateDepartedRocket(float roll, float pitch)
+    {
+        angleSetTime = departAngleSetTime;
+
+        rollPrev = rollCurrent;
+        pitchPrev = pitchCurrent;
+
+        rollCurrent = roll;
+        pitchCurrent = pitch;
+
+        rollDiff = rollCurrent - rollPrev;
+        pitchDiff = pitchCurrent - pitchPrev;
+
         rollSet = rollPrev;
         pitchSet = pitchPrev;
     }
