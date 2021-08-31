@@ -85,9 +85,19 @@ public class RocketController : MonoBehaviour
     // depart modeling
     private bool applyOnceFirst = false;
     private bool applyOnceSecond = false;
+
     private float departAngleSetTime = 1.5f;
     private float departRollAngle = 0f;
     private float departPitchAngle = 0f;
+
+    private bool isDeparting = false;
+    private float departTimer;
+
+    // rocket parts individual floating movement check
+    public static bool isMiddleTopMoving = false;
+    public static bool isBottomMoving = false;
+    public static bool isTopMoving = false;
+    public static bool isMiddleMoving = false;
 
     [Header("TEST OPENING PARACHUTES")]
     [SerializeField]
@@ -116,10 +126,20 @@ public class RocketController : MonoBehaviour
     
     void Update()
     {
-        // timer to wait for first depart kinematic
+        if(isDeparting)
+        {
+            departTimer += Time.deltaTime;
+            if (departTimer >= (setFirstKinematicTime + 0.2f))
+                isDeparting = false;
+            else
+                return;
+        }
 
-        if (rocketFull.activeInHierarchy == false && Mathf.Abs(rollSet) == 90f || Mathf.Abs(pitchSet) == 90f)
+        if (rocketFull.activeInHierarchy == false && Mathf.Abs(rollSet) == 75f || Mathf.Abs(pitchSet) == 75f)
+        {
+            isMiddleTopMoving = true;
             return;
+        }
 
         if (rollDiff == 0f && pitchDiff == 0f)
             return;
@@ -138,6 +158,7 @@ public class RocketController : MonoBehaviour
 
         // rotation
         transform.rotation = Quaternion.Euler(rollSet, 0f, pitchSet);
+
     }
 
     void FixedUpdate()
@@ -158,24 +179,6 @@ public class RocketController : MonoBehaviour
 
         if (applyOnceFirst)
         {
-            // rotate departed rocket to proper position
-            float rollAngle = transform.rotation.eulerAngles.x;
-            float pitchAngle = transform.rotation.eulerAngles.z;
-            rollAngle = (rollAngle >= 270f) ? (rollAngle - 360f) : rollAngle;
-            pitchAngle = (pitchAngle >= 270f) ? (pitchAngle - 360f) : pitchAngle;
-
-            if (Mathf.Abs(rollAngle) >= Mathf.Abs(pitchAngle))
-            {
-                departRollAngle = (rollAngle >= 0f) ? 90f : -90f;
-                departPitchAngle = pitchAngle;
-            }
-            else
-            {
-                departPitchAngle = (pitchAngle >= 0f) ? 90f : -90f;
-                departRollAngle = rollAngle;
-            }
-            RotateDepartedRocket(departRollAngle, departPitchAngle);
-
             applyOnceFirst = false;
             rocketPart_MiddleTop.GetComponent<Rigidbody>().AddForce(transform.up * forceMagnitudeFirst, ForceMode.Impulse);
             rocketPart_Bottom.GetComponent<Rigidbody>().AddForce(-1 * transform.up * forceMagnitudeFirst, ForceMode.Impulse);
@@ -214,8 +217,11 @@ public class RocketController : MonoBehaviour
     {
         angleSetTime = departAngleSetTime;
 
-        rollPrev = rollCurrent;
-        pitchPrev = pitchCurrent;
+        rollPrev = transform.rotation.eulerAngles.x;
+        pitchPrev = transform.rotation.eulerAngles.z;
+
+        rollPrev = (rollPrev >= 270f) ? (rollPrev - 360f) : rollPrev;
+        pitchPrev = (pitchPrev >= 270f) ? (pitchPrev - 360f) : pitchPrev;
 
         rollCurrent = roll;
         pitchCurrent = pitch;
@@ -272,6 +278,10 @@ public class RocketController : MonoBehaviour
         // set gravity right away, kinematic after some time
         SetFirstDepartGravity(false);
         SetFirstObjectsKinematic();
+
+        // rocket is departing, freeze all rotation for some time
+        isDeparting = true;
+        departTimer = 0f;
     }
     #endregion
 
@@ -327,8 +337,25 @@ public class RocketController : MonoBehaviour
         {
             r.isKinematic = true;
         }
+        
+        // after set to kinematic, it's gonna rotate to horizontal pos
+        // rotate departed rocket to proper position
+        float rollAngle = transform.rotation.eulerAngles.x;
+        float pitchAngle = transform.rotation.eulerAngles.z;
+        rollAngle = (rollAngle >= 270f) ? (rollAngle - 360f) : rollAngle;
+        pitchAngle = (pitchAngle >= 270f) ? (pitchAngle - 360f) : pitchAngle;
 
-        // right after it's gonna start rotating down and moving
+        if (Mathf.Abs(rollAngle) >= Mathf.Abs(pitchAngle))
+        {
+            departRollAngle = (rollAngle >= 0f) ? 75f : -75f;
+            departPitchAngle = pitchAngle;
+        }
+        else
+        {
+            departPitchAngle = (pitchAngle >= 0f) ? 75f : -75f;
+            departRollAngle = rollAngle;
+        }
+        RotateDepartedRocket(departRollAngle, departPitchAngle);
     }
     #endregion
 
