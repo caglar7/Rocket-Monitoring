@@ -82,11 +82,16 @@ public class RocketController : MonoBehaviour
     [SerializeField]
     private float setSecondKinematicTime = 1f;
 
+    [Header("Departing Angle")]
+    [SerializeField]
+    private float departingAngle = 75f;
+    [SerializeField]
+    private float departAngleSetTime = 1.2f;
+
     // depart modeling
     private bool applyOnceFirst = false;
     private bool applyOnceSecond = false;
 
-    private float departAngleSetTime = 1.5f;
     private float departRollAngle = 0f;
     private float departPitchAngle = 0f;
 
@@ -97,7 +102,6 @@ public class RocketController : MonoBehaviour
     public static bool isMiddleTopMoving = false;
     public static bool isBottomMoving = false;
     public static bool isTopMoving = false;
-    public static bool isMiddleMoving = false;
 
     [Header("TEST OPENING PARACHUTES")]
     [SerializeField]
@@ -129,15 +133,14 @@ public class RocketController : MonoBehaviour
         if(isDeparting)
         {
             departTimer += Time.deltaTime;
-            if (departTimer >= (setFirstKinematicTime + 0.2f))
+            if (departTimer >= setFirstKinematicTime)
                 isDeparting = false;
             else
                 return;
         }
 
-        if (rocketFull.activeInHierarchy == false && Mathf.Abs(rollSet) == 75f || Mathf.Abs(pitchSet) == 75f)
+        if (rocketFull.activeInHierarchy == false && Mathf.Abs(rollSet) == departingAngle || Mathf.Abs(pitchSet) == departingAngle)
         {
-            isMiddleTopMoving = true;
             return;
         }
 
@@ -327,7 +330,10 @@ public class RocketController : MonoBehaviour
 
     IEnumerator WaitAndFirstKinematic()
     {
-        yield return new WaitForSeconds(setFirstKinematicTime);
+        yield return new WaitForSeconds(setFirstKinematicTime / 5f);
+        isMiddleTopMoving = true;
+        isBottomMoving = true;
+        yield return new WaitForSeconds(setFirstKinematicTime * 4f / 5f);
 
         // set object rb to kinematic and disable gravity
         rbMiddleTop.isKinematic = true;
@@ -347,12 +353,12 @@ public class RocketController : MonoBehaviour
 
         if (Mathf.Abs(rollAngle) >= Mathf.Abs(pitchAngle))
         {
-            departRollAngle = (rollAngle >= 0f) ? 75f : -75f;
+            departRollAngle = (rollAngle >= 0f) ? departingAngle : -departingAngle;
             departPitchAngle = pitchAngle;
         }
         else
         {
-            departPitchAngle = (pitchAngle >= 0f) ? 75f : -75f;
+            departPitchAngle = (pitchAngle >= 0f) ? departingAngle : -departingAngle;
             departRollAngle = rollAngle;
         }
         RotateDepartedRocket(departRollAngle, departPitchAngle);
@@ -372,7 +378,10 @@ public class RocketController : MonoBehaviour
 
     IEnumerator WaitAndSecondKinematic()
     {
-        yield return new WaitForSeconds(setSecondKinematicTime);
+        yield return new WaitForSeconds(setSecondKinematicTime / 4f);
+        isTopMoving = true;
+        yield return new WaitForSeconds(setSecondKinematicTime * 3f / 4f);
+
         SetSecondObjectsKinematic(true);
     }
     #endregion

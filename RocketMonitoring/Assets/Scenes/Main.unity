@@ -324,7 +324,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 157299618}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 9.24, z: 0}
+  m_LocalPosition: {x: 0, y: 9.29, z: 0}
   m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_Children: []
   m_Father: {fileID: 1799529108}
@@ -2448,7 +2448,7 @@ PrefabInstance:
     - target: {fileID: 6526893268849802160, guid: f1650192150fa654eac74bcfa4fd744d,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 8.441
+      value: 8.58
       objectReference: {fileID: 0}
     - target: {fileID: 6526893268849802160, guid: f1650192150fa654eac74bcfa4fd744d,
         type: 3}
@@ -4865,6 +4865,22 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 941546181}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1212193722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1212193721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be388c088feef4b4bada3f0e0f0684a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentRocketPart: 2
+  referencePoint: {fileID: 157299619}
+  initRotation: 60
+  initSetTime: 0.7
 --- !u!1 &1239583356
 GameObject:
   m_ObjectHideFlags: 0
@@ -5492,6 +5508,22 @@ FixedJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &1315295786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1315295784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be388c088feef4b4bada3f0e0f0684a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentRocketPart: 1
+  referencePoint: {fileID: 1361490522}
+  initRotation: 25
+  initSetTime: 0.5
 --- !u!54 &1315295787
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -6188,6 +6220,28 @@ Rigidbody:
     type: 3}
   m_PrefabInstance: {fileID: 1398854100}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1398854134 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6526893268849802161, guid: f1650192150fa654eac74bcfa4fd744d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1398854100}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1398854135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1398854134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be388c088feef4b4bada3f0e0f0684a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentRocketPart: 1
+  referencePoint: {fileID: 1361490522}
+  initRotation: 25
+  initSetTime: 0.5
 --- !u!1 &1444452397
 GameObject:
   m_ObjectHideFlags: 0
@@ -6798,10 +6852,10 @@ MonoBehaviour:
   rocketPart_All: {fileID: 1155107126}
   rocketPart_Bottom: {fileID: 1315295784}
   rocketPart_MiddleTop: {fileID: 1799529107}
-  forceMagnitudeFirst: 50
+  forceMagnitudeFirst: 60
   rocketPart_Middle: {fileID: 80921595}
   rocketPart_Top: {fileID: 1212193721}
-  forceMagnitudeSecond: 70
+  forceMagnitudeSecond: 75
   rbMiddleTop: {fileID: 1799529109}
   rbMiddleTopFixed: {fileID: 1361490517}
   rbBottom: {fileID: 1315295787}
@@ -6839,7 +6893,7 @@ MonoBehaviour:
   - {fileID: 1398854103}
   - {fileID: 1398854102}
   - {fileID: 710175853}
-  setFirstKinematicTime: 1
+  setFirstKinematicTime: 0.2
   sphere_FixedTop: {fileID: 157299618}
   secondRope:
   - {fileID: 670344710}
@@ -6875,7 +6929,9 @@ MonoBehaviour:
   - {fileID: 670344680}
   - {fileID: 670344679}
   - {fileID: 670344678}
-  setSecondKinematicTime: 2
+  setSecondKinematicTime: 0.2
+  departingAngle: 75
+  departAngleSetTime: 0.9
   openFirst: 0
   openSecond: 0
 --- !u!4 &1589247595
@@ -7314,8 +7370,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentRocketPart: 0
   referencePoint: {fileID: 1361490522}
-  initRotation: 60
-  initSetTime: 3
+  initRotation: 30
+  initSetTime: 0.7
 --- !u!1 &1862336796
 GameObject:
   m_ObjectHideFlags: 0

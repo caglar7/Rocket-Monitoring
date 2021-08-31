@@ -6,10 +6,9 @@ using UnityEngine;
 
 public enum RocketPart
 {
-    MiddleTop,
-    Bottom,
-    Top,
-    Middle
+    MiddleTop,      // initial and floating
+    Bottom,         // initial and floating
+    Top,            // initial and floating 
 }
 
 public class RocketPartMovement : MonoBehaviour
@@ -35,7 +34,8 @@ public class RocketPartMovement : MonoBehaviour
 
     void Update()
     {
-        if(RocketController.isMiddleTopMoving)
+        if(RocketController.isMiddleTopMoving && currentRocketPart == RocketPart.MiddleTop
+            || RocketController.isTopMoving && currentRocketPart == RocketPart.Top)
         {
             if(getReferenceVector == false)
             {
@@ -44,8 +44,7 @@ public class RocketPartMovement : MonoBehaviour
             }
 
             if(initialMovement)
-            {
-                
+            {         
                 // do initial rotation here for set time
                 initTimer += Time.deltaTime;
                 transform.RotateAround(referencePoint.position, -1 * refVector, initRotation * Time.deltaTime / initSetTime);
@@ -59,6 +58,31 @@ public class RocketPartMovement : MonoBehaviour
                 // after initial rotation, natural floating here
             }
 
+        }
+
+        if(RocketController.isBottomMoving && currentRocketPart == RocketPart.Bottom)
+        {
+
+            if (getReferenceVector == false)
+            {
+                getReferenceVector = true;
+                refVector = Vector3.Cross(-1 * transform.up, Vector3.down).normalized;
+            }
+
+            if (initialMovement)
+            {
+                // do initial rotation here for set time
+                initTimer += Time.deltaTime;
+                transform.RotateAround(referencePoint.position, refVector, initRotation * Time.deltaTime / initSetTime);
+
+                if (initTimer >= initSetTime)
+                    initialMovement = false;
+
+            }
+            else
+            {
+                // after initial rotation, natural floating here
+            }
         }
     }
 }
