@@ -73,7 +73,12 @@ public class RocketController : MonoBehaviour
     private Rigidbody[] rbFirstRope;
     [SerializeField]
     private float setFirstKinematicTime = 1f;
+    [SerializeField]
+    private GameObject firstParachutePrefab;
 
+    // get rid of every shadow
+    // hide fixed meshes used for rotation pivot
+    // move camera back smoothly
     [Header("Second Depart Objects")]
     [SerializeField]
     private GameObject sphere_FixedTop;
@@ -81,6 +86,8 @@ public class RocketController : MonoBehaviour
     private GameObject[] secondRope;
     [SerializeField]
     private float setSecondKinematicTime = 1f;
+    [SerializeField]
+    private GameObject secondParachutePrefab;
 
     [Header("Departing Angle")]
     [SerializeField]
@@ -343,7 +350,10 @@ public class RocketController : MonoBehaviour
         {
             r.isKinematic = true;
         }
-        
+
+        // open parachute here, works fine for now
+        Instantiate(firstParachutePrefab, rbMiddleTopFixed.position, Quaternion.identity);
+
         // after set to kinematic, it's gonna rotate to horizontal pos
         // rotate departed rocket to proper position
         float rollAngle = transform.rotation.eulerAngles.x;
@@ -383,6 +393,9 @@ public class RocketController : MonoBehaviour
         yield return new WaitForSeconds(setSecondKinematicTime * 3f / 4f);
 
         SetSecondObjectsKinematic(true);
+
+        // open second parachute
+        Instantiate(secondParachutePrefab, sphere_FixedTop.transform.position, Quaternion.identity);
     }
     #endregion
 
