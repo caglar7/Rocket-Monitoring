@@ -102,6 +102,8 @@ public class DisplayData : MonoBehaviour
     private TextWriter textWriter;
     private TextWriter textWriterPayload;
     private DateTime localDate;
+    private Char char1;
+    private Char char2;
 
     void InitSerialPort()
     {
@@ -113,6 +115,10 @@ public class DisplayData : MonoBehaviour
 
     void Start()
     {
+        // commma or dot in order for excel, for libre and mic
+        char1 = EntryManager.excelCommaOrDot[0];
+        char2 = EntryManager.excelCommaOrDot[1];
+
         // get data from player pref about flight records
         flightRecordCount = PlayerPrefs.GetInt(keyFlightRecordNumber, 0);
         recordName = "\\FlightRecord_" + flightRecordCount.ToString() + ".csv";
@@ -415,11 +421,11 @@ public class DisplayData : MonoBehaviour
             // check for roll and pitch
             if (i == 6)
             {
-                excelString += RPstrings[0].Replace('.', ',') + ";";
-                excelString += RPstrings[1].Replace('.', ',') + ";";
+                excelString += RPstrings[0].Replace(char1, char2) + ";";
+                excelString += RPstrings[1].Replace(char1, char2) + ";";
             }
             else
-                excelString += datas[i].Replace('.', ',') + ";";
+                excelString += datas[i].Replace(char1, char2) + ";";
         }
 
         textWriter = new StreamWriter(recordFileName, true);
@@ -451,7 +457,7 @@ public class DisplayData : MonoBehaviour
         // writing id, time, lat, long, altitude, speed, till index 5
         for(int i=0; i<6; i++)
         {
-            excelString += datas[i].Replace('.', ',') + ";";
+            excelString += datas[i].Replace(char1, char2) + ";";
         }
         textWriterPayload = new StreamWriter(recordFileNamePayload, true);
         textWriterPayload.WriteLine(excelString);
@@ -459,35 +465,3 @@ public class DisplayData : MonoBehaviour
         // ------------------------------------------------------------------------------------
     }
 }
-
-
-/* TEXT DISPLAY CODE
- * 
-    // display lat and long, 0 and 1
-    textRocketLatLong.text = "" + "Rocket Coordinates\n";
-    textRocketLatLong.text += datas[0] + "\n";
-    textRocketLatLong.text += datas[1];
-
-    // display altitude and velocity, 2 and 3
-    textRocketAltitude.text = "" + "Altitude\n";
-    textRocketAltitude.text += datas[2];
-    textRocketVelocity.text = "" + "Velocity\n";
-    textRocketVelocity.text += datas[3];
-
-    // display first and second parachute, 5 and 6
-    if (datas[5] == "0")
-        textFirstParachute.color = colorDefaultFrtSnd;
-    else
-        textFirstParachute.color = colorGreenFrtSnd;
-
-    if (datas[6] == "0")
-        textSecondParachute.color = colorDefaultFrtSnd;
-    else
-        textSecondParachute.color = colorGreenFrtSnd;
-
-    // display base lat and long, 7 and 8
-    textBaseLatLong.text = "" + "Base Coordinates\n";
-    textBaseLatLong.text += datas[7] + "\n";
-    textBaseLatLong.text += datas[8];
-
- */

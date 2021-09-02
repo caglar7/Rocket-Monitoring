@@ -35,7 +35,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 	[SerializeField] float _initialCameraSetTime = 2f;
 	Vector3 _cameraTargetPos;
 	Vector3 _cameraDiff;
-	bool _setCameraToBase = false;
+	bool _setCameraToRocket = false;
 	bool _setCameraTarget = false;
 	public float currentScale = 1f;
 
@@ -119,7 +119,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 	private void Update()
 	{
 		// SET INITIAL CAMERA POSITION ONCE -------------------------------------------------------------
-		if(_setCameraToBase == false && _setCameraTarget == true)
+		if(_setCameraToRocket == false && _setCameraTarget == true)
         {
 			_mapCamera.transform.position += (_cameraDiff * Time.deltaTime / _initialCameraSetTime);
 			float currentX = _mapCamera.transform.position.x;
@@ -129,7 +129,7 @@ public class SpawnOnMapCustom : MonoBehaviour
             {
 				// stop here
 				_mapCamera.transform.position = _cameraTargetPos;
-				_setCameraToBase = true;
+				_setCameraToRocket = true;
 				LogManager.instance.SendMessageToLog("Map is loaded");
 			}
         }
@@ -272,18 +272,6 @@ public class SpawnOnMapCustom : MonoBehaviour
 		nextBasePosition = Conversions.StringToLatLon(locString);
 		_diffValues[0] = nextBasePosition - _locations[0];
 		initialDiffBase = nextBasePosition - _locations[0];
-
-		// take base position in world position
-		Vector3 baseWorldPos = _map.GeoToWorldPosition(nextBasePosition, false);
-
-		// set camera target and initial positions
-		if (_setCameraTarget == false)
-        {
-			_setCameraTarget = true;
-			_cameraTargetPos = new Vector3(baseWorldPos.x, _baseScaleFactor, baseWorldPos.z);
-			Vector3 camInit = new Vector3(_mapCamera.transform.position.x, _baseScaleFactor, _mapCamera.transform.position.z);
-			_cameraDiff = _cameraTargetPos - camInit;
-        }
 	}
 
 	public void SetRocketPosition(string locString)
@@ -292,6 +280,18 @@ public class SpawnOnMapCustom : MonoBehaviour
 		nextRocketPosition = Conversions.StringToLatLon(locString);
 		_diffValues[1] = nextRocketPosition - _locations[1];
 		initialDiffRocket = nextRocketPosition - _locations[1];
+
+		// take rocket position in world position
+		Vector3 rocketWorldPos = _map.GeoToWorldPosition(nextRocketPosition, false);
+
+		// set camera target and initial positions to rocket initial lat long
+		if (_setCameraTarget == false)
+		{
+			_setCameraTarget = true;
+			_cameraTargetPos = new Vector3(rocketWorldPos.x, _baseScaleFactor, rocketWorldPos.z);
+			Vector3 camInit = new Vector3(_mapCamera.transform.position.x, _baseScaleFactor, _mapCamera.transform.position.z);
+			_cameraDiff = _cameraTargetPos - camInit;
+		}
 	}
 
 	public void SetPayLoadPosition(string locString)

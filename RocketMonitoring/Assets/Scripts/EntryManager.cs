@@ -97,8 +97,24 @@ public class EntryManager : MonoBehaviour
     public static string keyDownloadedTiles = "keyDownloadedTiles";
     private const int TILE_LIMIT = 3000;
 
+    // Mic and Libre Office Toggle parameters
+    [Header("Office Toggle Parameters")]
+    [SerializeField]
+    private ToggleGroup toggleGroup;
+    private bool isMicOffice = false;
+    private bool isLibreOffice = true;
+    public static string excelCommaOrDot = ".,";  // . and , for mic office in order
+
     void Start()
     {
+        // check toggle group state and assign static field
+        // get toggle state
+        string currentToggleName = toggleGroup.ActiveToggles().FirstOrDefault().name;
+        if (currentToggleName == "ToggleMicrosoft")
+            excelCommaOrDot = ".,";
+        else if (currentToggleName == "ToggleLibre")
+            excelCommaOrDot = ",.";
+
         // get downloaded tile amoung, later this will be the accurate cached tile amount
         downloadedTiles = PlayerPrefs.GetInt(keyDownloadedTiles, 0);
         tileCacher.UpdateTileLimitText(downloadedTiles);
@@ -448,4 +464,13 @@ public class EntryManager : MonoBehaviour
         DeactivateClearCacheMenu();
     }
 
+    public void ToggleTrigger(bool value)
+    {
+        // check toggle group state and assign static field
+        string currentToggleName = toggleGroup.ActiveToggles().FirstOrDefault().name;
+        if (currentToggleName == "ToggleMicrosoft")
+            excelCommaOrDot = ".,";
+        else if (currentToggleName == "ToggleLibre")
+            excelCommaOrDot = ",.";
+    }
 }
