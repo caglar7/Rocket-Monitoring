@@ -34,6 +34,10 @@ public class RocketController : MonoBehaviour
     // rotation only happens between specific angles, 2, 4, 6, 8 etc.
     private float roundAngle = 3f;
 
+    [Header("Camera Animator")]
+    [SerializeField]
+    private Animator animatorCamera;
+
     [Header("Rocket Materials")]
     [SerializeField]
     private Material[] rocketMaterials;
@@ -76,6 +80,22 @@ public class RocketController : MonoBehaviour
     [SerializeField]
     private GameObject firstParachutePrefab;
 
+    [Header("First Depart Payload Parachute")]
+    [SerializeField]
+    private GameObject payloadParachutePrefab;
+    [SerializeField]
+    private float forceMagPayloadParachute = 10f;
+    [SerializeField]
+    private float payloadImpulseMult = 1f;
+    [SerializeField]
+    private float setForceDirY = .1f;
+
+    [Header("First Depart Payload Object")]
+    [SerializeField]
+    private GameObject payloadPrefab;
+    [SerializeField]
+    private float forceMagPayloadObject = 10f;
+
     // get rid of every shadow
     // hide fixed meshes used for rotation pivot
     // move camera back smoothly
@@ -98,6 +118,8 @@ public class RocketController : MonoBehaviour
     // depart modeling
     private bool applyOnceFirst = false;
     private bool applyOnceSecond = false;
+    private bool applyOncePayloadParachute = false;
+    private bool applyOncePayloadObject = false;
 
     private float departRollAngle = 0f;
     private float departPitchAngle = 0f;
@@ -133,8 +155,7 @@ public class RocketController : MonoBehaviour
         // deactivate rocket parts
         rocketPart_All.gameObject.SetActive(false);
     }
-
-    
+ 
     void Update()
     {
         if(isDeparting)
@@ -198,6 +219,35 @@ public class RocketController : MonoBehaviour
             applyOnceSecond = false;
             Vector3 secondForceDir = rocketPart_MiddleTop.transform.up;
             rocketPart_Top.GetComponent<Rigidbody>().AddForce(secondForceDir * forceMagnitudeSecond, ForceMode.Impulse);
+        }
+
+        if(applyOncePayloadParachute)
+        {
+            applyOncePayloadParachute = false;
+            Vector3 forceDir = -1 * rocketPart_MiddleTop.transform.up;
+            forceDir.y = setForceDirY;
+
+            GameObject payloadParachute = Instantiate(payloadParachutePrefab, rbMiddleTopFixed.gameObject.transform.position, Quaternion.identity);
+            payloadParachute.transform.eulerAngles = -1 * rocketPart_MiddleTop.transform.eulerAngles;
+
+            // reach script of parachute and add force that way,
+            // script will rotate parachute aswell
+            payloadParachute.GetComponent<Rigidbody>().AddForce(forceDir * forceMagPayloadParachute * payloadImpulseMult, ForceMode.Impulse);
+            payloadParachute.GetComponent<PayloadParachute>().ApplyConstantForce(forceDir * forceMagPayloadParachute, 150f);
+        }
+
+        if(applyOncePayloadObject)
+        {
+            applyOncePayloadObject = false;
+            Vector3 forceDir = rocketPart_Bottom.transform.up;
+
+            Vector3 startPos = rbFirstRope[rbFirstRope.Length - 1].gameObject.transform.position;
+
+            GameObject payloadObject = Instantiate(payloadPrefab, startPos, Quaternion.identity);
+            payloadObject.transform.eulerAngles = rocketPart_Bottom.transform.eulerAngles;
+
+            // impulse force on forceDir
+            payloadObject.GetComponent<Rigidbody>().AddForce(forceDir * forceMagPayloadObject, ForceMode.Impulse);
         }
     }
 
@@ -275,6 +325,9 @@ public class RocketController : MonoBehaviour
     #region Open First Parachute
     public void OpenFirstParachute()
     {
+        // initially move camera back
+        animatorCamera.SetBool("MoveBack", true);
+
         // activate parts object
         rocketFull.gameObject.SetActive(false);
         rocketPart_All.gameObject.SetActive(true);
@@ -352,7 +405,12 @@ public class RocketController : MonoBehaviour
         }
 
         // open parachute here, works fine for now
-        Instantiate(firstParachutePrefab, rbMiddleTopFixed.position, Quaternion.identity);
+        Instantiate(firstParachutePrefab, rbMiddleTopFixed.gameObject.transform.position, Quaternion.identity);
+
+        // test, throw payload parachute here, impulse on payload parachute from middle bottom part
+        applyOncePayloadParachute = true;
+        // test, throw payload object here
+        applyOncePayloadObject = true;
 
         // after set to kinematic, it's gonna rotate to horizontal pos
         // rotate departed rocket to proper position

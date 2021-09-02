@@ -48,6 +48,7 @@ public class RocketPartMovement : MonoBehaviour
                 // do initial rotation here for set time
                 initTimer += Time.deltaTime;
                 transform.RotateAround(referencePoint.position, -1 * refVector, initRotation * Time.deltaTime / initSetTime);
+                
 
                 if (initTimer >= initSetTime)
                     initialMovement = false;
