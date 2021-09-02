@@ -239,15 +239,12 @@ public class RocketController : MonoBehaviour
         if(applyOncePayloadObject)
         {
             applyOncePayloadObject = false;
-            Vector3 forceDir = rocketPart_Bottom.transform.up;
 
             Vector3 startPos = rbFirstRope[rbFirstRope.Length - 1].gameObject.transform.position;
-
             GameObject payloadObject = Instantiate(payloadPrefab, startPos, Quaternion.identity);
             payloadObject.transform.eulerAngles = rocketPart_Bottom.transform.eulerAngles;
 
-            // impulse force on forceDir
-            payloadObject.GetComponent<Rigidbody>().AddForce(forceDir * forceMagPayloadObject, ForceMode.Impulse);
+            payloadObject.GetComponent<PayloadObject>().ConnectToParachute(0.2f, 0.4f);
         }
     }
 

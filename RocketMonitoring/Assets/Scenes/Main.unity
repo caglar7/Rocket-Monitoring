@@ -7232,8 +7232,8 @@ MonoBehaviour:
     type: 3}
   payloadParachutePrefab: {fileID: 5595226112112601370, guid: 912e87d958ac8ef47828ca1d034c469d,
     type: 3}
-  forceMagPayloadParachute: 10
-  payloadImpulseMult: 1.3
+  forceMagPayloadParachute: 20
+  payloadImpulseMult: 1.2
   setForceDirY: 0.3
   payloadPrefab: {fileID: 2127943899072823934, guid: 05949880aed61224cac27db238668347,
     type: 3}
