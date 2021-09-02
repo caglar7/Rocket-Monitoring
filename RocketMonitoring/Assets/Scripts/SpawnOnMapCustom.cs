@@ -35,8 +35,9 @@ public class SpawnOnMapCustom : MonoBehaviour
 	[SerializeField] float _initialCameraSetTime = 2f;
 	Vector3 _cameraTargetPos;
 	Vector3 _cameraDiff;
-	bool _setCameraToRocket = false;
+	bool _setCameraToCheck = false;
 	bool _setCameraTarget = false;
+	bool _initialCameraSet = false;
 	public float currentScale = 1f;
 
 	[Header("Marker Parameters")]
@@ -119,7 +120,7 @@ public class SpawnOnMapCustom : MonoBehaviour
 	private void Update()
 	{
 		// SET INITIAL CAMERA POSITION ONCE -------------------------------------------------------------
-		if(_setCameraToRocket == false && _setCameraTarget == true)
+		if(_setCameraToCheck == false && _setCameraTarget == true)
         {
 			_mapCamera.transform.position += (_cameraDiff * Time.deltaTime / _initialCameraSetTime);
 			float currentX = _mapCamera.transform.position.x;
@@ -129,7 +130,7 @@ public class SpawnOnMapCustom : MonoBehaviour
             {
 				// stop here
 				_mapCamera.transform.position = _cameraTargetPos;
-				_setCameraToRocket = true;
+				_setCameraToCheck = true;
 				LogManager.instance.SendMessageToLog("Map is loaded");
 			}
         }
@@ -285,8 +286,9 @@ public class SpawnOnMapCustom : MonoBehaviour
 		Vector3 rocketWorldPos = _map.GeoToWorldPosition(nextRocketPosition, false);
 
 		// set camera target and initial positions to rocket initial lat long
-		if (_setCameraTarget == false)
+		if (_setCameraTarget == false && _initialCameraSet == false)
 		{
+			_initialCameraSet = true;
 			_setCameraTarget = true;
 			_cameraTargetPos = new Vector3(rocketWorldPos.x, _baseScaleFactor, rocketWorldPos.z);
 			Vector3 camInit = new Vector3(_mapCamera.transform.position.x, _baseScaleFactor, _mapCamera.transform.position.z);
@@ -358,7 +360,47 @@ public class SpawnOnMapCustom : MonoBehaviour
 		scale = Mathf.Clamp(scale, 0f, 1f);
 		return scale;
 	}
+
+	public void SetCameraToBase()
+    {
+		_setCameraToCheck = false;
+		_setCameraTarget = true;
+
+		Vector2d basePosition = _locations[0];
+		Vector3 baseWorldPos = _map.GeoToWorldPosition(basePosition, false);
+
+		_cameraTargetPos = new Vector3(baseWorldPos.x, _baseScaleFactor, baseWorldPos.z);
+		Vector3 camInit = new Vector3(_mapCamera.transform.position.x, _baseScaleFactor, _mapCamera.transform.position.z);
+		_cameraDiff = _cameraTargetPos - camInit;
+	}
+
+	public void SetCameraToRocket()
+	{
+		_setCameraToCheck = false;
+		_setCameraTarget = true;
+
+		Vector2d rocketPosition = _locations[1];
+		Vector3 rocketWorldPos = _map.GeoToWorldPosition(rocketPosition, false);
+
+		_cameraTargetPos = new Vector3(rocketWorldPos.x, _baseScaleFactor, rocketWorldPos.z);
+		Vector3 camInit = new Vector3(_mapCamera.transform.position.x, _baseScaleFactor, _mapCamera.transform.position.z);
+		_cameraDiff = _cameraTargetPos - camInit;
+	}
+
+	public void SetCameraToPayload()
+	{
+		_setCameraToCheck = false;
+		_setCameraTarget = true;
+
+		Vector2d payloadPosition = _locations[2];
+		Vector3 payloadWorldPos = _map.GeoToWorldPosition(payloadPosition, false);
+
+		_cameraTargetPos = new Vector3(payloadWorldPos.x, _baseScaleFactor, payloadWorldPos.z);
+		Vector3 camInit = new Vector3(_mapCamera.transform.position.x, _baseScaleFactor, _mapCamera.transform.position.z);
+		_cameraDiff = _cameraTargetPos - camInit;
+	}
 }
+
 
 
 

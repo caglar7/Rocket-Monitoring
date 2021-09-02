@@ -384,6 +384,8 @@ public class DisplayData : MonoBehaviour
 
     private void ModelRocket(List<string> datas)
     {
+        Debug.Log("first: " + datas[7] + "second: " + datas[8]);
+
         // altitude display, convert float then format to proper string
         float altitudeData = float.Parse(datas[4]) / 100f;
         textAltitude.text = altitudeData.ToString();
@@ -398,12 +400,19 @@ public class DisplayData : MonoBehaviour
 
         // 1st parachute
         if (datas[7] == "1")
+        {
             firstParachute.color = greenColor;
+            RocketController.instance.OpenFirstParachute();
+        }
         else if (datas[7] == "0")
             firstParachute.color = defaultColor;
+
         // 2nd parachute
         if (datas[8] == "1")
+        {
             secondParachute.color = greenColor;
+            RocketController.instance.OpenSecondParachute();
+        }
         else if (datas[8] == "0")
             secondParachute.color = defaultColor;
 

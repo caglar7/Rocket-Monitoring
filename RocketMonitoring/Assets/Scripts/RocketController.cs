@@ -115,6 +115,14 @@ public class RocketController : MonoBehaviour
     [SerializeField]
     private float departAngleSetTime = 1.2f;
 
+    [Header("Explosions")]
+    [SerializeField]
+    private GameObject openingExplosion;
+    [SerializeField]
+    private Transform firstOpeningTransform;
+    [SerializeField]
+    private Transform secondOpeningTransform;
+
     // depart modeling
     private bool applyOnceFirst = false;
     private bool applyOnceSecond = false;
@@ -132,7 +140,6 @@ public class RocketController : MonoBehaviour
     public static bool isBottomMoving = false;
     public static bool isTopMoving = false;
 
-    [Header("TEST OPENING PARACHUTES")]
     [SerializeField]
     private bool openFirst = false;
     [SerializeField]
@@ -194,31 +201,26 @@ public class RocketController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (openFirst)
-        {
-            openFirst = false;
-            OpenFirstParachute();
-            Debug.Log("opening 1");
-        }
-
-        if (openSecond)
-        {
-            openSecond = false;
-            Debug.Log("opening 2");
-            OpenSecondParachute();
-        }
-
         if (applyOnceFirst)
         {
             applyOnceFirst = false;
             rocketPart_MiddleTop.GetComponent<Rigidbody>().AddForce(transform.up * forceMagnitudeFirst, ForceMode.Impulse);
             rocketPart_Bottom.GetComponent<Rigidbody>().AddForce(-1 * transform.up * forceMagnitudeFirst, ForceMode.Impulse);
+
+            // explosion here
+            GameObject explosion1 = Instantiate(openingExplosion, firstOpeningTransform.position, Quaternion.identity);
+            explosion1.transform.eulerAngles = rocketPart_MiddleTop.transform.eulerAngles;
         }
+
         if(applyOnceSecond)
         {
             applyOnceSecond = false;
             Vector3 secondForceDir = rocketPart_MiddleTop.transform.up;
             rocketPart_Top.GetComponent<Rigidbody>().AddForce(secondForceDir * forceMagnitudeSecond, ForceMode.Impulse);
+
+            // explosion here
+            GameObject explosion2 = Instantiate(openingExplosion, secondOpeningTransform.position, Quaternion.identity);
+            explosion2.transform.eulerAngles = rocketPart_Top.transform.eulerAngles;
         }
 
         if(applyOncePayloadParachute)
@@ -259,6 +261,10 @@ public class RocketController : MonoBehaviour
         rollCurrent = float.Parse(rollString) / 100f;
         pitchCurrent = float.Parse(pitchString) / 100f;
 
+        // clamp values
+        rollCurrent = Mathf.Clamp(rollCurrent, -90f, 90f);
+        pitchCurrent = Mathf.Clamp(pitchCurrent, -90f, 90f);
+
         // round to proper angles
         rollCurrent = RoundAngle(rollCurrent);
         pitchCurrent = RoundAngle(pitchCurrent);
@@ -272,6 +278,10 @@ public class RocketController : MonoBehaviour
 
     private void RotateDepartedRocket(float roll, float pitch)
     {
+        // clamp values
+        roll = Mathf.Clamp(roll, -90f, 90f);
+        pitch = Mathf.Clamp(pitch, -90f, 90f);
+
         angleSetTime = departAngleSetTime;
 
         rollPrev = transform.rotation.eulerAngles.x;
@@ -322,6 +332,28 @@ public class RocketController : MonoBehaviour
     #region Open First Parachute
     public void OpenFirstParachute()
     {
+        if(openFirst == false)
+        {
+            // check angles first
+            if (Mathf.Abs(rollSet) <= 15f || Mathf.Abs(pitchSet) <= 15f)
+            {
+                angleSetTime = .4f;
+                RotateRocket("0.00", "-30.00");
+                StartCoroutine(RotateAndOpen(angleSetTime));
+            }
+            else
+            {
+                TryOpenFirstParachute();
+            }
+
+            openFirst = true;
+        }
+    }
+    #endregion
+
+    #region Try Open First Parachute
+    public void TryOpenFirstParachute()
+    {
         // initially move camera back
         animatorCamera.SetBool("MoveBack", true);
 
@@ -348,6 +380,9 @@ public class RocketController : MonoBehaviour
     #region Open Second Parachute
     public void OpenSecondParachute()
     {
+        if (openFirst == false || openSecond == true)
+            return;
+
         // add components and open second parachute
         // give second objects rigidbodies, fixed joints
         rocketPart_Top.AddComponent<Rigidbody>();
@@ -376,6 +411,7 @@ public class RocketController : MonoBehaviour
         StartCoroutine(WaitAndSecondKinematic());
 
         applyOnceSecond = true;
+        openSecond = true;
     }
     #endregion
 
@@ -479,4 +515,12 @@ public class RocketController : MonoBehaviour
         }
     }
     #endregion
+
+    // handling initia parachute open error
+    // when rocket has low angles
+    IEnumerator RotateAndOpen(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        TryOpenFirstParachute();
+    }
 }
