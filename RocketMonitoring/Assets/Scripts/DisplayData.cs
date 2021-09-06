@@ -78,6 +78,7 @@ public class DisplayData : MonoBehaviour
     private bool isDataUsable = false;
     private string errorStorageString = "";
     private string usableDataString = "";
+    private bool deactivateBooster = false;
 
     // TIMER PARAMETERS
     // make sure this matches with arduino data transmission freq 
@@ -88,7 +89,7 @@ public class DisplayData : MonoBehaviour
     private float timerNoData = 0f;
     private bool startNoDataTimer = false;
 
-    // TEST DELETE LATER
+    // Counting error data
     private int countValid = 0;
     private int countNotValid = 0;
 
@@ -402,7 +403,13 @@ public class DisplayData : MonoBehaviour
         if (datas[7] == "1")
         {
             firstParachute.color = greenColor;
-            RocketController.instance.OpenFirstParachute();
+            if(deactivateBooster == false)
+            {
+                deactivateBooster = true;
+                if (RocketController.instance.boosterEffect != null)
+                    RocketController.instance.boosterEffect.Stop();
+            }
+
         }
         else if (datas[7] == "0")
             firstParachute.color = defaultColor;
@@ -411,7 +418,6 @@ public class DisplayData : MonoBehaviour
         if (datas[8] == "1")
         {
             secondParachute.color = greenColor;
-            RocketController.instance.OpenSecondParachute();
         }
         else if (datas[8] == "0")
             secondParachute.color = defaultColor;

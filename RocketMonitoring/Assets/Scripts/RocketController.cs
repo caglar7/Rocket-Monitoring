@@ -140,10 +140,12 @@ public class RocketController : MonoBehaviour
     public static bool isBottomMoving = false;
     public static bool isTopMoving = false;
 
-    [SerializeField]
+    // parachute bools
     private bool openFirst = false;
-    [SerializeField]
     private bool openSecond = false;
+
+    // booster effect
+    public ParticleSystem boosterEffect;
  
     void Awake()
     {
@@ -161,6 +163,10 @@ public class RocketController : MonoBehaviour
 
         // deactivate rocket parts
         rocketPart_All.gameObject.SetActive(false);
+
+        // get particle system for booster
+        boosterEffect = rocketFull.gameObject.GetComponentInChildren<ParticleSystem>();
+
     }
  
     void Update()
