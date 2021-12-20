@@ -130,18 +130,16 @@ public class DisplayData : MonoBehaviour
         recordFileNamePayload = EntryManager.flightRecordsPath + recordNamePayload;
 
         PlayerPrefs.SetInt(keyFlightRecordNumber, flightRecordCount + 1);
-
-        //textWriter = new StreamWriter(recordFileName, false);
-        //textWriter.WriteLine("LOCAL TIME" + ";" + "ID" + ";" + "TIME" + ";" + "ROCKET_LAT" + ";" + "ROCKET_LONG"
-        //    + ";" + "ALTITUDE" + ";" + "VELOCITY" + ";" + "ROLL" + ";" + "PITCH" + ";" + "FIRST"
-        //    + ";" + "SECOND" + ";" + "BASE_LAT" + ";" + "BASE_LONG");
-        //textWriter.Close();
+        textWriter = new StreamWriter(recordFileName, false);
+        textWriter.WriteLine("LOCAL TIME" + ";" + "ID" + ";" + "TIME" + ";" + "ROCKET_LAT" + ";" + "ROCKET_LONG"
+            + ";" + "ALTITUDE" + ";" + "VELOCITY" + ";" + "ROLL" + ";" + "PITCH" + ";" + "FIRST"
+            + ";" + "SECOND" + ";" + "BASE_LAT" + ";" + "BASE_LONG");
+        textWriter.Close();
 
         // writing to payload csv file
         textWriterPayload = new StreamWriter(recordFileNamePayload, false);
         textWriterPayload.WriteLine("LOCAL TIME" + ";" + "ID" + ";" + "TIME" + ";" + "PAYLOAD_LAT" + ";" + "PAYLOAD_LONG"
-            + ";" + "ALTITUDE" + ";" + "VELOCITY" + ";" + "ROLL" + ";" + "PITCH" + ";" + "FIRST"
-            + ";" + "SECOND" + ";" + "BASE_LAT" + ";" + "BASE_LONG");
+            + ";" + "ALTITUDE" + ";" + "VELOCITY");
         textWriterPayload.Close();
 
         // assign data from EntryManager
@@ -255,9 +253,10 @@ public class DisplayData : MonoBehaviour
 
                     // check if id 0 or 1
                     if (datas[0] == "0")
-                    {
-                        ModelRocket(datas);     // model payload for now
-                    }
+                        ModelRocket(datas);
+
+                    else if (datas[0] == "1")
+                        ModelPayLoad(datas);
 
                 }
                 // -----------------------------------------------------------------------------------------
@@ -389,22 +388,19 @@ public class DisplayData : MonoBehaviour
 
     private void ModelRocket(List<string> datas)
     {
+        Debug.Log("first: " + datas[7] + "second: " + datas[8]);
+
         // altitude display, convert float then format to proper string
-        // assign payload altitude
         float altitudeData = float.Parse(datas[4]) / 100f;
-        textAltitudePayload.text = altitudeData.ToString();
-        textAltitudePayload.text = altitudeData.ToString();
+        textAltitude.text = altitudeData.ToString();
 
-        // assign payload speed
+        // velocity unit conversion and set on speedometer, 3
         float speedData_meters = float.Parse(datas[5]) / 100f;
-        speedometerPayload.SetSpeed(speedData_meters);
+        speedometer.SetSpeed(speedData_meters);
 
-        // assign rotation until first parachute
+        // assign rotation directions string on the RocketController.cs, 4
         string[] RPstrings = datas[6].Split(',');
-        if (datas[7] == "0")
-        {
-            RocketController.instance.RotateRocket(RPstrings[0], RPstrings[1]);
-        }
+        RocketController.instance.RotateRocket(RPstrings[0], RPstrings[1]);
 
         // 1st parachute
         if (datas[7] == "1")
@@ -432,7 +428,7 @@ public class DisplayData : MonoBehaviour
 
         // pass lat long to the map script, base 7 8, rocket 0 1
         SpawnOnMapCustom.instance.SetBasePosition(datas[9] + "," + datas[10]);
-        SpawnOnMapCustom.instance.SetPayLoadPosition(datas[2] + "," + datas[3]);
+        SpawnOnMapCustom.instance.SetRocketPosition(datas[2] + "," + datas[3]);
 
         // SAVE DATA TO EXCEL ---------------------------------------------------------------
         string excelString = "";
@@ -451,9 +447,9 @@ public class DisplayData : MonoBehaviour
                 excelString += datas[i].Replace(char1, char2) + ";";
         }
 
-        textWriterPayload = new StreamWriter(recordFileNamePayload, true);
-        textWriterPayload.WriteLine(excelString);
-        textWriterPayload.Close();
+        textWriter = new StreamWriter(recordFileName, true);
+        textWriter.WriteLine(excelString);
+        textWriter.Close();
 
         // ------------------------------------------------------------------------------------
     }
