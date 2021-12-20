@@ -148,7 +148,10 @@ public class DisplayData : MonoBehaviour
         readPeriod = EntryManager.dataObtainPeriod;
         readPeriodRemaining = readPeriod;
 
-        InitSerialPort();
+        StopBits stopBits = StopBits.One;
+        sp = new SerialPort(EntryManager.dataCOM, EntryManager.dataBaudRate, 0, 8, stopBits);
+        sp.ReadTimeout = 100;
+        sp.Open();
     }
 
     void Update()
