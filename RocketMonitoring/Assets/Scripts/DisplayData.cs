@@ -150,6 +150,9 @@ public class DisplayData : MonoBehaviour
         sp = new SerialPort(EntryManager.dataCOM, EntryManager.dataBaudRate, 0, 8, stopBits);
         sp.ReadTimeout = 100;
         sp.Open();
+
+        Debug.Log("com: " + EntryManager.dataCOM);
+        Debug.Log("baud:" + EntryManager.dataBaudRate);
     }
 
     void Update()
