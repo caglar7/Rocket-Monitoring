@@ -413,7 +413,7 @@ public class DisplayData : MonoBehaviour
                 if (RocketController.instance.boosterEffect != null)
                     RocketController.instance.boosterEffect.Stop();
             }
-
+            RocketController.instance.OpenFirstParachute();
         }
         else if (datas[7] == "0")
             firstParachute.color = defaultColor;
@@ -422,6 +422,7 @@ public class DisplayData : MonoBehaviour
         if (datas[8] == "1")
         {
             secondParachute.color = greenColor;
+            RocketController.instance.OpenSecondParachute();
         }
         else if (datas[8] == "0")
             secondParachute.color = defaultColor;
