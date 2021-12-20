@@ -9,6 +9,9 @@ On the top left corner, there is a log screen where the string data flow coming 
 The ingame debug console is pretty usefull in this project, you can check it out from https://github.com/yasirkula/UnityIngameDebugConsole.
 Also for the map features, https://github.com/mapbox/mapbox-unity-sdk.
 
+<img src="images/image4.png" height="250"> <img src="images/image5.png" height="250">    
+
+
 
 
 
