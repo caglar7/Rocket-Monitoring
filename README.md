@@ -11,6 +11,7 @@ Also for the map features, https://github.com/mapbox/mapbox-unity-sdk.
 
 <img src="images/image4.png" height="250"> <img src="images/image5.png" height="250">    
 
+On the first parachute event, payload is released from the rocket body and the minimap can be used to track the location of it. Second parachute was for the rocket itself for its landing.
 
 
 
