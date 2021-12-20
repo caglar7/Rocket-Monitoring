@@ -4,4 +4,12 @@ This project is a base station made with Unity that monitors the flight of a mod
 
 <img src="images/image2.png" height="250"> <img src="images/image3.png" height="250"> 
 
+On the top left corner, there is a log screen where the string data flow coming from serial port and some other log messages can be observed. Right below it, there is the altitude of the rocket and the payload. On the left bottom corner there is a speedometer that displays the velocities. On the up right side, parachute condition (whether they are open or not). Lastly on the bottom right corner, there is a map which also works offline.
+
+The ingame debug console is pretty usefull in this project, you can check it out from https://github.com/yasirkula/UnityIngameDebugConsole.
+Also for the map features, https://github.com/mapbox/mapbox-unity-sdk.
+
+
+
+
 
